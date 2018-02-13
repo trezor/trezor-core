@@ -87,7 +87,7 @@ class PassphraseKeyboard(ui.Widget):
         self.prompt = prompt
         self.page = page
         self.input = Input(ui.grid(0, n_x=1, n_y=6), '')
-        self.back = Button(ui.grid(12), res.load(ui.ICON_BACK), style=ui.BTN_CLEAR)
+        self.back = Button(ui.grid(12), res.load(ui.ICON_CLEAR), style=ui.BTN_CANCEL)
         self.done = Button(ui.grid(14), res.load(ui.ICON_CONFIRM), style=ui.BTN_CONFIRM)
         self.keys = key_buttons(KEYBOARD_KEYS[self.page])
         self.pbutton = None  # pending key button
@@ -146,9 +146,12 @@ class PassphraseKeyboard(ui.Widget):
         self.pindex = index
         self.input.edit(content, button is not None)
         if content:
-            self.back.enable()
+            self.back = Button(ui.grid(12), res.load(ui.ICON_BACK), style=ui.BTN_CLEAR)
+            self.back.render()
         else:
-            self.back.disable()
+            self.back.content = res.load(ui.ICON_CLEAR)
+            self.back.normal_style = ui.BTN_CANCEL['normal']
+            self.back.enable()
 
     async def __iter__(self):
         self.edit(self.input.content)  # init button state
