@@ -53,8 +53,25 @@ void PIXELDATA(uint16_t c) {
     if (!RENDERER) {
         display_init();
     }
+
+    int r = ((c & 0xF800) >> 11) * 255 / 31;
+    int g = ((c & 0x07E0) >> 5) * 255 / 63;
+    int b = (c & 0x1F) * 255 / 31;
+
+#define BITS_R 3
+#define BITS_G 3
+#define BITS_B 2
+
+    r >>= (8 - BITS_R);
+    g >>= (8 - BITS_G);
+    b >>= (8 - BITS_B);
+
+    r = r * 255 / ((1 << BITS_R) - 1);
+    g = g * 255 / ((1 << BITS_G) - 1);
+    b = b * 255 / ((1 << BITS_B) - 1);
+
     if (PIXELWINDOW.pos.x <= PIXELWINDOW.end.x && PIXELWINDOW.pos.y <= PIXELWINDOW.end.y) {
-        ((uint16_t *)BUFFER->pixels)[PIXELWINDOW.pos.x + PIXELWINDOW.pos.y * BUFFER->pitch / sizeof(uint16_t)] = c;
+        ((uint16_t *)BUFFER->pixels)[PIXELWINDOW.pos.x + PIXELWINDOW.pos.y * BUFFER->pitch / sizeof(uint16_t)] = RGB16(r, g, b);
     }
     PIXELWINDOW.pos.x++;
     if (PIXELWINDOW.pos.x > PIXELWINDOW.end.x) {
@@ -65,6 +82,17 @@ void PIXELDATA(uint16_t c) {
 #else
 #define PIXELDATA(X) (void)(X)
 #endif
+
+void display_clear(void)
+{
+#ifndef TREZOR_NOUI
+    if (!RENDERER) {
+        display_init();
+    }
+    SDL_FillRect(BUFFER, NULL, SDL_MapRGB(BUFFER->format, 0, 0, 0));
+    SDL_UpdateTexture(TEXTURE, NULL, BUFFER->pixels, BUFFER->pitch);
+#endif
+}
 
 void display_init(void)
 {
