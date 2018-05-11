@@ -11,6 +11,7 @@ import apps.homescreen
 import apps.management
 import apps.wallet
 import apps.ethereum
+import apps.stellar
 if __debug__:
     import apps.debug
 else:
@@ -21,6 +22,7 @@ apps.homescreen.boot()
 apps.management.boot()
 apps.wallet.boot()
 apps.ethereum.boot()
+apps.stellar.boot()
 if __debug__:
     apps.debug.boot()
 else:
