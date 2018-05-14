@@ -5,14 +5,14 @@ import protobuf as p
 class StellarSignMessage(p.MessageType):
     FIELDS = {
         1: ('address_n', p.UVarintType, p.FLAG_REPEATED),
-        2: ('message', p.UnicodeType, 0),
+        2: ('message', p.BytesType, 0),
     }
     MESSAGE_WIRE_TYPE = 204
 
     def __init__(
         self,
         address_n: list = None,
-        message: str = None,
+        message: bytes = None,
         **kwargs,
     ):
         self.address_n = [] if address_n is None else address_n
