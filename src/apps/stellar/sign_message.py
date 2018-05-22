@@ -16,6 +16,7 @@ async def sign_message(ctx, msg: StellarSignMessage):
     node = await seed.derive_node(ctx, msg.address_n, STELLAR_CURVE)
     pubkey = seed.remove_ed25519_public_key_prefix(node.public_key())
 
+    # todo prefix msg.message!
     signature = ed25519.sign(node.private_key(), msg.message)
 
     sig = StellarMessageSignature()
