@@ -293,7 +293,7 @@ static void test_sbu(const char *args)
 {
     secbool sbu1 = sectrue * (args[0] == '1');
     secbool sbu2 = sectrue * (args[1] == '1');
-    sbu_set(sbu1, sbu2);
+    sbu_set_pins(sbu1, sbu2);
     vcp_printf("OK");
 }
 

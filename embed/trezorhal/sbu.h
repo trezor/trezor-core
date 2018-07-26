@@ -20,9 +20,14 @@
 #ifndef __TREZORHAL_SBU_H__
 #define __TREZORHAL_SBU_H__
 
+#include <stdint.h>
 #include "secbool.h"
 
 void sbu_init(void);
-void sbu_set(secbool sbu1, secbool sbu2);
+void sbu_uart_on(void);
+void sbu_uart_off(void);
+int sbu_read(uint8_t *data, uint16_t len);
+void sbu_write(const uint8_t *data, uint16_t len);
+void sbu_set_pins(secbool sbu1, secbool sbu2);
 
 #endif

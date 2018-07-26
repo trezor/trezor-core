@@ -19,10 +19,21 @@
 
 #include "sbu.h"
 
-void sbu_init(void)
-{
+void sbu_init(void) {}
+
+void sbu_uart_on(void) {}
+
+void sbu_uart_off(void) {}
+
+int sbu_read(uint8_t *data, uint16_t len) {
+    (void)data;
+    (void)len;
+    return 0;
 }
 
-void sbu_set(secbool sbu1, secbool sbu2)
-{
+void sbu_write(const uint8_t *data, uint16_t len) {
+    (void)data;
+    (void)len;
 }
+
+void sbu_set_pins(secbool sbu1, secbool sbu2) {}

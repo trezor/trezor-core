@@ -109,7 +109,7 @@ def test_sd():
 def test_sbu(v):
     sbu1 = (v[0] == '1')
     sbu2 = (v[1] == '1')
-    sbu.set(sbu1, sbu2)
+    sbu.set_pins(sbu1, sbu2)
     print('OK')
 
 

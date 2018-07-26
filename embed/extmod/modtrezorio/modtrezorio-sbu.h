@@ -37,18 +37,59 @@ STATIC mp_obj_t mod_trezorio_SBU_make_new(const mp_obj_type_t *type, size_t n_ar
     return MP_OBJ_FROM_PTR(o);
 }
 
-/// def set(self, sbu1: bool, sbu2: bool) -> None:
+/// def read(buffer: bytearray) -> int:
+///     '''
+///     Reads from SBU
+///     '''
+STATIC mp_obj_t mod_trezorio_SBU_read(mp_obj_t self, mp_obj_t buffer) {
+    mp_buffer_info_t b;
+    mp_get_buffer_raise(buffer, &b, MP_BUFFER_WRITE);
+    int res = sbu_read(b.buf, b.len);
+    return MP_OBJ_NEW_SMALL_INT(res);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_SBU_read_obj, mod_trezorio_SBU_read);
+
+/// def write(buffer: bytearray) -> None:
+///     '''
+///     Wwrites from SBU
+///     '''
+STATIC mp_obj_t mod_trezorio_SBU_write(mp_obj_t self, mp_obj_t buffer) {
+    mp_buffer_info_t b;
+    mp_get_buffer_raise(buffer, &b, MP_BUFFER_READ);
+    sbu_write(b.buf, b.len);
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_SBU_write_obj, mod_trezorio_SBU_write);
+
+/// def set_uart(self, serial: bool) -> None:
 ///     '''
 ///     Sets SBU wires to sbu1 and sbu2 values respectively
 ///     '''
-STATIC mp_obj_t mod_trezorio_SBU_set(mp_obj_t self, mp_obj_t sbu1, mp_obj_t sbu2) {
-    sbu_set(sectrue * mp_obj_is_true(sbu1), sectrue * mp_obj_is_true(sbu2));
+STATIC mp_obj_t mod_trezorio_SBU_set_uart(mp_obj_t self, mp_obj_t serial) {
+    if (mp_obj_is_true(serial)) {
+        sbu_uart_on();
+    } else {
+        sbu_uart_off();
+    }
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(mod_trezorio_SBU_set_obj, mod_trezorio_SBU_set);
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_SBU_set_uart_obj, mod_trezorio_SBU_set_uart);
+
+/// def set_pins(self, sbu1: bool, sbu2: bool) -> None:
+///     '''
+///     Sets SBU wires to sbu1 and sbu2 values respectively
+///     '''
+STATIC mp_obj_t mod_trezorio_SBU_set_pins(mp_obj_t self, mp_obj_t sbu1, mp_obj_t sbu2) {
+    sbu_set_pins(sectrue * mp_obj_is_true(sbu1), sectrue * mp_obj_is_true(sbu2));
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(mod_trezorio_SBU_set_pins_obj, mod_trezorio_SBU_set_pins);
 
 STATIC const mp_rom_map_elem_t mod_trezorio_SBU_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_set), MP_ROM_PTR(&mod_trezorio_SBU_set_obj) },
+    { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&mod_trezorio_SBU_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_write), MP_ROM_PTR(&mod_trezorio_SBU_write_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_uart), MP_ROM_PTR(&mod_trezorio_SBU_set_uart_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_pins), MP_ROM_PTR(&mod_trezorio_SBU_set_pins_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(mod_trezorio_SBU_locals_dict, mod_trezorio_SBU_locals_dict_table);
 
