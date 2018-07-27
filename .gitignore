@@ -8,3 +8,6 @@ _attic/
 build/
 build-docker/
 emu.config
+venv/
+cmake-build-*
+.idea
