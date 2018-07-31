@@ -1,4 +1,5 @@
 from typing import *
+from types import ModuleType
 
 def exit(retval: Any = ...) -> None:
     raise SystemExit()
@@ -13,4 +14,4 @@ implementation = ...  # type: Tuple[str, Tuple[int, int, int]]
 platform = ...  # type: str
 byteorder = ...  # type: str
 maxsize = ...  # type: int
-modules = ...  # type: Dict[str, Any]
+modules = ...  # type: Dict[str, ModuleType]
