@@ -25,5 +25,8 @@ termcolor = ">=0.1.2"
 Pillow = ">=5.2.0"
 Mako = ">=1.0.7"
 
+# monero
+monero_agent = {version = ">=1.6.3", extras = ["tcry", "dev"]}
+
 [pipenv]
 allow_prereleases = true
