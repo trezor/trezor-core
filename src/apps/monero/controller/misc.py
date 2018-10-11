@@ -110,3 +110,24 @@ def dump_rsig_bp(rsig):
     offset += 32
     memcpy(buff, offset, rsig.t, 0, 32)
     return buff
+
+
+def get_monero_rct_type(rct_type, rsig_type):
+    """
+    This converts our internal representation of RctType and RsigType
+    into what is used in Monero:
+    - Null = 0
+    - Full = 1
+    - Simple = 2
+    - Simple/Full with bulletproof = 3
+    """
+    from apps.monero.protocol.signing.rct_type import RctType
+    from apps.monero.protocol.signing.rsig_type import RsigType
+
+    if rsig_type == RsigType.Bulletproof:
+        return 3  # Bulletproofs
+
+    if rct_type == RctType.Simple:
+        return 2  # Simple
+    else:
+        return 1  # Full

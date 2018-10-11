@@ -8,6 +8,8 @@ from .state import State
 
 from apps.monero.layout import confirms
 from apps.monero.protocol import hmac_encryption_keys
+from apps.monero.protocol.signing.rct_type import RctType
+from apps.monero.protocol.signing.rsig_type import RsigType
 from apps.monero.xmr import common, crypto
 
 if False:
@@ -52,8 +54,8 @@ async def input_vini(
     state.tx_prefix_hasher.buffer(vini_bin)
 
     # in monero version >= 8 pseudo outs were moved to a different place
-    # use_bulletproofs implies version >= 8
-    if state.use_simple_rct and not state.use_bulletproof:
+    # bulletproofs imply version >= 8
+    if state.rct_type == RctType.Simple and state.rsig_type != RsigType.Bulletproof:
         _hash_vini_pseudo_out(state, pseudo_out, pseudo_out_hmac)
 
     return MoneroTransactionInputViniAck()

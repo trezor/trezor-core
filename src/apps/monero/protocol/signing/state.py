@@ -61,9 +61,12 @@ class State:
         """
         self.need_additional_txkeys = False
 
-        # TODO to be modified
-        self.use_bulletproof = False
-        self.use_simple_rct = False
+        # Ring Confidential Transaction type
+        # allowed values: RctType.{Full, Simple}
+        self.rct_type = None
+        # Range Signature type (also called range proof)
+        # allowed values: RsigType.{Borromean, Bulletproof}
+        self.rsig_type = None
 
         self.input_count = 0
         self.output_count = 0
@@ -96,7 +99,7 @@ class State:
         # the range proofs are calculated in batches, this denotes the grouping
         self.rsig_grouping = []
         # is range proof computing offloaded or not
-        self.rsig_offload = 0
+        self.rsig_offload = False
 
         # sum of all inputs' pseudo out masks
         self.sumpouts_alphas = crypto.sc_0()
@@ -147,15 +150,3 @@ class State:
 
     def change_address(self):
         return self.output_change.addr if self.output_change else None
-
-    def get_rct_type(self):
-        """
-        RCTsig type (simple/full x Borromean/Bulletproof)
-        :return:
-        """
-        from apps.monero.xmr.serialize_messages.tx_rsig import RctType
-
-        if self.use_simple_rct:
-            return RctType.FullBulletproof if self.use_bulletproof else RctType.Simple
-        else:
-            return RctType.Full

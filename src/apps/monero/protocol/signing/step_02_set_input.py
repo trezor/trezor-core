@@ -15,6 +15,7 @@ from .state import State
 
 from apps.monero.controller import misc
 from apps.monero.layout import confirms
+from apps.monero.protocol.signing.rct_type import RctType
 from apps.monero.xmr import crypto, monero
 
 if False:
@@ -99,7 +100,7 @@ async def set_input(state: State, src_entr: MoneroTransactionSourceEntry):
     pseudo_out_hmac = None
     alpha_enc = None
 
-    if state.use_simple_rct:
+    if state.rct_type == RctType.Simple:
         alpha, pseudo_out = _gen_commitment(state, src_entr.amount)
         pseudo_out = crypto.encodepoint(pseudo_out)
 

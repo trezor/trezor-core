@@ -11,6 +11,7 @@ from .state import State
 from apps.monero.controller import misc
 from apps.monero.layout import confirms
 from apps.monero.protocol import hmac_encryption_keys
+from apps.monero.protocol.signing.rsig_type import RsigType
 from apps.monero.xmr import common, crypto
 
 
@@ -176,7 +177,7 @@ def _range_proof(state, amount, rsig_data):
     C, rsig = None, None
 
     state.mem_trace("pre-rproof" if __debug__ else None, collect=True)
-    if not state.rsig_offload and state.use_bulletproof:
+    if state.rsig_type == RsigType.Bulletproof and not state.rsig_offload:
         """Bulletproof calculation in trezor"""
         rsig = ring_ct.prove_range_bp_batch(state.output_amounts, state.output_masks)
         state.mem_trace("post-bp" if __debug__ else None, collect=True)
@@ -193,7 +194,7 @@ def _range_proof(state, amount, rsig_data):
             "post-bp-ser, size: %s" % len(rsig) if __debug__ else None, collect=True
         )
 
-    elif not state.rsig_offload and not state.use_bulletproof:
+    elif state.rsig_type == RsigType.Borromean and not state.rsig_offload:
         """Borromean calculation in trezor"""
         C, mask, rsig = ring_ct.prove_range_chunked(amount, mask)
         del (ring_ct)
@@ -202,7 +203,7 @@ def _range_proof(state, amount, rsig_data):
         state.full_message_hasher.rsig_val(rsig, False, raw=True)
         _check_out_commitment(state, amount, mask, C)
 
-    elif state.rsig_offload and state.use_bulletproof:
+    elif state.rsig_type == RsigType.Bulletproof and state.rsig_offload:
         """Bulletproof calculated on host, verify in trezor"""
         from apps.monero.xmr.serialize_messages.tx_rsig_bulletproof import Bulletproof
 
@@ -223,7 +224,7 @@ def _range_proof(state, amount, rsig_data):
         state.mem_trace("BP verified" if __debug__ else None, collect=True)
         del (bp_obj, ring_ct)
 
-    elif state.rsig_offload and not state.use_bulletproof:
+    elif state.rsig_type == RsigType.Borromean and state.rsig_offload:
         """Borromean offloading not supported"""
         raise misc.TrezorError(
             "Unsupported rsig state (Borromean offloaded is not supported)"

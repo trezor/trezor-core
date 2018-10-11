@@ -8,6 +8,7 @@ import gc
 
 from .state import State
 
+from apps.monero.controller import misc
 from apps.monero.layout import confirms
 from apps.monero.xmr import crypto
 
@@ -46,7 +47,9 @@ async def all_outputs_set(state: State):
 
     # Initializes RCTsig structure (fee, tx prefix hash, type)
     rv_pb = MoneroRingCtSig(
-        txn_fee=state.fee, message=state.tx_prefix_hash, rv_type=state.get_rct_type()
+        txn_fee=state.fee,
+        message=state.tx_prefix_hash,
+        rv_type=misc.get_monero_rct_type(state.rct_type, state.rsig_type),
     )
 
     return MoneroTransactionAllOutSetAck(
@@ -55,11 +58,13 @@ async def all_outputs_set(state: State):
 
 
 def _validate(state: State):
+    from apps.monero.protocol.signing.rct_type import RctType
+
     if state.current_output_index + 1 != state.output_count:
         raise ValueError("Invalid out num")
 
     # Test if \sum Alpha == \sum A
-    if state.use_simple_rct:
+    if state.rct_type == RctType.Simple:
         state.assrt(crypto.sc_eq(state.sumout, state.sumpouts_alphas))
 
     # Fee test

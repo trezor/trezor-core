@@ -8,6 +8,7 @@ from trezor import utils
 from .state import State
 
 from apps.monero.layout import confirms
+from apps.monero.protocol.signing.rct_type import RctType
 from apps.monero.xmr import crypto
 
 
@@ -27,7 +28,7 @@ async def all_inputs_set(state: State):
     for i in range(state.output_count):
         cur_mask = crypto.new_scalar()  # new mask for each output
         is_last = i + 1 == state.output_count
-        if is_last and state.use_simple_rct:
+        if is_last and state.rct_type == RctType.Simple:
             # in SimpleRCT the last mask needs to be calculated as an offset of the sum
             crypto.sc_sub_into(cur_mask, state.sumpouts_alphas, state.sumout)
         else:
@@ -36,7 +37,7 @@ async def all_inputs_set(state: State):
         crypto.sc_add_into(state.sumout, state.sumout, cur_mask)
         state.output_masks.append(cur_mask)
 
-    if state.use_simple_rct:
+    if state.rct_type == RctType.Simple:
         state.assrt(
             crypto.sc_eq(state.sumout, state.sumpouts_alphas), "Invalid masks sum"
         )  # sum check

@@ -8,6 +8,7 @@ from .state import State
 
 from apps.monero.controller import misc
 from apps.monero.layout import confirms
+from apps.monero.protocol.signing.rct_type import RctType
 from apps.monero.xmr import common, crypto
 
 if False:
@@ -47,11 +48,11 @@ async def sign_input(
     state.current_input_index += 1
     if state.current_input_index >= state.input_count:
         raise ValueError("Invalid inputs count")
-    if state.use_simple_rct and pseudo_out is None:
+    if state.rct_type == RctType.Simple and pseudo_out is None:
         raise ValueError("SimpleRCT requires pseudo_out but none provided")
-    if state.use_simple_rct and pseudo_out_alpha_enc is None:
+    if state.rct_type == RctType.Simple and pseudo_out_alpha_enc is None:
         raise ValueError("SimpleRCT requires pseudo_out's mask but none provided")
-    if state.current_input_index >= 1 and not state.use_simple_rct:
+    if state.current_input_index >= 1 and not state.rct_type == RctType.Simple:
         raise ValueError("Two and more inputs must imply SimpleRCT")
 
     input_position = state.source_permutation[state.current_input_index]
@@ -66,7 +67,7 @@ async def sign_input(
     gc.collect()
     state.mem_trace(1)
 
-    if state.use_simple_rct:
+    if state.rct_type == RctType.Simple:
         # both pseudo_out and its mask were offloaded so we need to
         # validate pseudo_out's HMAC and decrypt the alpha
         pseudo_out_hmac_comp = crypto.compute_hmac(
@@ -130,7 +131,7 @@ async def sign_input(
     # RCT signature
     from apps.monero.xmr import mlsag2
 
-    if state.use_simple_rct:
+    if state.rct_type == RctType.Simple:
         # Simple RingCT
         mix_ring = [x.key for x in src_entr.outputs]
         mg, msc = mlsag2.prove_rct_mg_simple(
