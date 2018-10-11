@@ -26,6 +26,9 @@ class State:
     STEP_SIGN = const(700)
 
     def __init__(self, ctx):
+        from apps.monero.xmr.sub.keccak_hasher import KeccakXmrArchive
+        from apps.monero.xmr.sub.mlsag_hasher import PreMlsagHasher
+
         self.ctx = ctx
 
         """
@@ -37,9 +40,7 @@ class State:
         """
         self.creds = None
 
-        """
-        Encryption keys
-        """
+        # HMAC/encryption keys used to protect offloaded data
         self.key_hmac = None
         self.key_enc = None
 
@@ -54,48 +55,80 @@ class State:
         self.tx_priv = None
         self.tx_pub = None
 
+        """
+        In some cases when subaddresses are used we need more tx_keys
+        (explained in step 1).
+        """
         self.need_additional_txkeys = False
+
+        # TODO to be modified
         self.use_bulletproof = False
         self.use_simple_rct = False
+
         self.input_count = 0
         self.output_count = 0
         self.output_change = None
-        self.mixin = 0
         self.fee = 0
-        self.account_idx = 0  # wallet sub-address major index
 
+        # wallet sub-address major index
+        self.account_idx = 0
+
+        # contains additional tx keys if need_additional_tx_keys is True
         self.additional_tx_private_keys = []
         self.additional_tx_public_keys = []
+
+        # currently processed input/output index
         self.current_input_index = -1
         self.current_output_index = -1
+
         self.summary_inputs_money = 0
         self.summary_outs_money = 0
-        self.input_secrets = []
+
+        # output commitments
+        # using 'masks' in the name is quite unfortunate because this
+        # actually does not contain any masks, but the whole commitment
+        self.output_pk_masks = []
+        # masks used in the output commitment
         self.output_sk_masks = []
-        self.output_pk_masks = []  # commitments
+
         self.output_amounts = []
+        # output *range proof* masks
         self.output_masks = []
 
+        # the range proofs are calculated in batches, this denotes the grouping
         self.rsig_grouping = []
+        # is range proof computing offloaded or not
         self.rsig_offload = 0
-        self.sumout = crypto.sc_0()
+
+        # sum of all inputs' pseudo out masks
         self.sumpouts_alphas = crypto.sc_0()
+        # sum of all output' pseudo out masks
+        self.sumout = crypto.sc_0()
+
         self.subaddresses = {}
-        self.tx = None
-        self.source_permutation = []  # sorted by key images
-        self.tx_prefix_hasher = None
-        self.tx_prefix_hash = None
-        self.full_message_hasher = None
-        self.full_message = None  # pre-MLSAG hash
-        self._init()
 
-    def _init(self):
-        from apps.monero.xmr.sub.keccak_hasher import KeccakXmrArchive
-        from apps.monero.xmr.sub.mlsag_hasher import PreMlsagHasher
-
+        # simple stub containing items hashed into tx prefix
         self.tx = TprefixStub(vin=[], vout=[], extra=b"")
+
+        # contains an array where each item denotes the input's position
+        # (inputs are sorted by key images)
+        self.source_permutation = []
+
+        """
+        Tx prefix hasher/hash. We use the hasher to incrementally hash and then
+        store the final hash in tx_prefix_hash.
+        See Monero-Trezor documentation section 3.3 for more details.
+        """
         self.tx_prefix_hasher = KeccakXmrArchive()
+        self.tx_prefix_hash = None
+
+        """
+        Full message hasher/hash that is to be signed using MLSAG.
+        Contains tx_prefix_hash.
+        See Monero-Trezor documentation section 3.3 for more details.
+        """
         self.full_message_hasher = PreMlsagHasher()
+        self.full_message = None
 
     def mem_trace(self, x=None, collect=False):
         if __debug__:
