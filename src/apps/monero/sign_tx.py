@@ -105,7 +105,6 @@ async def sign_tx_dispatch(state, msg):
     elif msg.MESSAGE_WIRE_TYPE == MessageType.MoneroTransactionAllOutSetRequest:
         from apps.monero.protocol.signing import step_07_all_outputs_set
 
-        # todo check TrezorTxPrefixHashNotMatchingError
         return (
             await step_07_all_outputs_set.all_outputs_set(state),
             (MessageType.MoneroTransactionMlsagDoneRequest,),
