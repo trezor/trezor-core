@@ -153,7 +153,7 @@ async def sign_input(
             mix_ring,
             [input_secret_key],
             state.output_sk_masks,
-            state.output_pk_masks,
+            state.output_pk_commitments,
             kLRki,
             index,
             txn_fee_key,

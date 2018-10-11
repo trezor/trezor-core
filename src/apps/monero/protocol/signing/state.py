@@ -85,9 +85,7 @@ class State:
         self.summary_outs_money = 0
 
         # output commitments
-        # using 'masks' in the name is quite unfortunate because this
-        # actually does not contain any masks, but the whole commitment
-        self.output_pk_masks = []
+        self.output_pk_commitments = []
         # masks used in the output commitment
         self.output_sk_masks = []
 

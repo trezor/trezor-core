@@ -61,7 +61,7 @@ async def set_output(state: State, dst_entr, dst_entr_hmac, rsig_data):
     tx_out_bin, hmac_vouti = await _set_out_tx_out(state, dst_entr, tx_out_key)
     state.mem_trace(11, True)
 
-    out_pk, ecdh_info_bin = _get_ecdh_info_and_out_pk(
+    out_pk_dest, out_pk_commitment, ecdh_info_bin = _get_ecdh_info_and_out_pk(
         state=state,
         tx_out_key=tx_out_key,
         amount=dst_entr.amount,
@@ -77,9 +77,9 @@ async def set_output(state: State, dst_entr, dst_entr_hmac, rsig_data):
     state.full_message_hasher.set_ecdh(ecdh_info_bin)
     state.mem_trace(13, True)
 
-    # Output_pk is stored to the state as it is used during the signature and hashed to the
+    # output_pk_commitment is stored to the state as it is used during the signature and hashed to the
     # RctSigBase later. No need to store amount, it was already stored.
-    state.output_pk_masks.append(out_pk.mask)
+    state.output_pk_commitments.append(out_pk_commitment)
     state.mem_trace(14, True)
 
     from trezor.messages.MoneroTransactionSetOutputAck import (
@@ -87,8 +87,8 @@ async def set_output(state: State, dst_entr, dst_entr_hmac, rsig_data):
     )
 
     out_pk_bin = bytearray(64)
-    utils.memcpy(out_pk_bin, 0, out_pk.dest, 0, 32)
-    utils.memcpy(out_pk_bin, 32, out_pk.mask, 0, 32)
+    utils.memcpy(out_pk_bin, 0, out_pk_dest, 0, 32)
+    utils.memcpy(out_pk_bin, 32, out_pk_commitment, 0, 32)
 
     return MoneroTransactionSetOutputAck(
         tx_out=tx_out_bin,
@@ -257,12 +257,9 @@ def _get_ecdh_info_and_out_pk(state: State, tx_out_key, amount, mask, amount_key
     Also encodes the two items - `mask` and `amount` - into ecdh info,
     so the recipient is able to reconstruct the commitment.
     """
-    from apps.monero.xmr.serialize_messages.ct_keys import CtKey
+    out_pk_dest = crypto.encodepoint(tx_out_key)
+    out_pk_commitment = crypto.encodepoint(crypto.gen_commitment(mask, amount))
 
-    out_pk = CtKey(
-        dest=crypto.encodepoint(tx_out_key),
-        mask=crypto.encodepoint(crypto.gen_commitment(mask, amount)),
-    )
     state.sumout = crypto.sc_add(state.sumout, mask)
     state.output_sk_masks.append(mask)
 
@@ -275,7 +272,7 @@ def _get_ecdh_info_and_out_pk(state: State, tx_out_key, amount, mask, amount_key
     utils.memcpy(ecdh_info_bin, 32, ecdh_info.amount, 0, 32)
     gc.collect()
 
-    return out_pk, ecdh_info_bin
+    return out_pk_dest, out_pk_commitment, ecdh_info_bin
 
 
 def _ecdh_encode(mask, amount, amount_key):

@@ -33,8 +33,8 @@ def _out_pk(state: State):
     """
     Hashes out_pk into the full message.
     """
-    if state.output_count != len(state.output_pk_masks):
+    if state.output_count != len(state.output_pk_commitments):
         raise ValueError("Invalid number of ecdh")
 
-    for out in state.output_pk_masks:
-        state.full_message_hasher.set_out_pk_mask(out)
+    for out in state.output_pk_commitments:
+        state.full_message_hasher.set_out_pk_commitment(out)

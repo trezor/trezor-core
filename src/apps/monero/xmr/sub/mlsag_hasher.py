@@ -50,11 +50,11 @@ class PreMlsagHasher:
         self.state = 4
         self.rtcsig_hasher.buffer(ecdh)
 
-    def set_out_pk_mask(self, out_pk_mask):
+    def set_out_pk_commitment(self, out_pk_commitment):
         if self.state != 4 and self.state != 5:
             raise ValueError("State error")
         self.state = 5
-        self.rtcsig_hasher.buffer(out_pk_mask)  # ECKey
+        self.rtcsig_hasher.buffer(out_pk_commitment)  # ECKey
 
     def rctsig_base_done(self):
         if self.state != 5:
