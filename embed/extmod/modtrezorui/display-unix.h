@@ -139,6 +139,7 @@ void display_init(void)
     DISPLAY_BACKLIGHT = 0;
 #ifdef TREZOR_EMULATOR_RASPI
     DISPLAY_ORIENTATION = 270;
+    SDL_ShowCursor(SDL_DISABLE);
 #else
     DISPLAY_ORIENTATION = 0;
 #endif
