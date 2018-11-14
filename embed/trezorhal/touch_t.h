@@ -126,12 +126,23 @@ uint32_t touch_read(void)
     static uint8_t touch_data[TOUCH_PACKET_SIZE], previous_touch_data[TOUCH_PACKET_SIZE];
 
     uint8_t outgoing[] = {0x00}; // start reading from address 0x00
+
     if (HAL_OK != HAL_I2C_Master_Transmit(&i2c_handle, TOUCH_ADDRESS, outgoing, sizeof(outgoing), 1)) {
+        touch_power_off();
+        touch_power_on();
         return 0;
     }
 
     if (HAL_OK != HAL_I2C_Master_Receive(&i2c_handle, TOUCH_ADDRESS, touch_data, TOUCH_PACKET_SIZE, 1)) {
-        return 0; // read failure
+        touch_power_off();
+        touch_power_on();
+        return 0;
+    }
+
+    if (touch_data[0] == 0xFF) {  // CTPM stalled
+        touch_power_off();
+        touch_power_on();
+        return 0;
     }
 
     if (0 == memcmp(previous_touch_data, touch_data, TOUCH_PACKET_SIZE)) {
