@@ -32,8 +32,12 @@ async def recovery_device(ctx, msg):
     if not msg.dry_run and storage.is_initialized():
         raise wire.UnexpectedMessage("Already initialized")
 
-    text = Text("Device recovery", ui.ICON_RECOVERY)
-    text.normal("Do you really want to", "recover the device?", "")
+    if msg.dry_run:
+        text = Text("Check recovery seed", ui.ICON_RECOVERY)
+        text.normal("Do you really want to", "check your recovery", "seed?")
+    else:
+        text = Text("Recover wallet", ui.ICON_RECOVERY)
+        text.normal("Do you really want to", "restore a wallet from", "your backup?")
 
     await require_confirm(ctx, text, code=ProtectCall)
 
@@ -58,7 +62,7 @@ async def recovery_device(ctx, msg):
             config.change_pin(pin_to_int(""), pin_to_int(newpin))
         storage.load_settings(label=msg.label, use_passphrase=msg.passphrase_protection)
         storage.load_mnemonic(mnemonic=mnemonic, needs_backup=False, no_backup=False)
-        return Success(message="Device recovered")
+        return Success(message="Wallet recovered")
     else:
         if storage.get_mnemonic() == mnemonic:
             return Success(
@@ -74,7 +78,7 @@ async def recovery_device(ctx, msg):
 async def request_wordcount(ctx):
     await ctx.call(ButtonRequest(code=MnemonicWordCount), ButtonAck)
 
-    text = Text("Device recovery", ui.ICON_RECOVERY)
+    text = Text("Recovery seed", ui.ICON_RECOVERY)
     text.normal("Number of words?")
     count = await ctx.wait(WordSelector(text))
 
