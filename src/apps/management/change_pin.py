@@ -16,7 +16,7 @@ async def change_pin(ctx, msg):
 
     # get current pin, return failure if invalid
     if config.has_pin():
-        curpin = await request_pin_ack(ctx)
+        curpin = await request_pin_ack(ctx, "Enter old PIN")
         if not config.check_pin(pin_to_int(curpin)):
             raise wire.PinInvalid("PIN invalid")
     else:
@@ -42,7 +42,7 @@ def require_confirm_change_pin(ctx, msg):
     has_pin = config.has_pin()
 
     if msg.remove and has_pin:  # removing pin
-        text = Text("Remove PIN", ui.ICON_CONFIG)
+        text = Text("Disable PIN", ui.ICON_CONFIG)
         text.normal("Do you really want to")
         text.bold("disable PIN protection?")
         return require_confirm(ctx, text)
