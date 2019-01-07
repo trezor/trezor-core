@@ -3,14 +3,15 @@ builddir = build/unix
 cc = gcc
 py = python
 
-cflags_common = -std=gnu99 -Wall -Werror -Wuninitialized -fdata-sections -ffunction-sections
+cflags_common = -std=gnu99 -Wall -Werror -Wuninitialized -Wno-sequence-point -fdata-sections -ffunction-sections
 cflags_debug = -g3
 cflags_opt = -Os
-cflags_inc = -I. -Ivendor/micropython -Ivendor/micropython/ports/unix -Iembed/unix -Iembed/extmod/modtrezorui -I$builddir $
-    -Ivendor/trezor-crypto -Wno-sequence-point -DAES_128 -DAES_192 -DUSE_KECCAK=1 -DUSE_ETHEREUM=1 -DUSE_MONERO=1 -DUSE_CARDANO=1 -DUSE_NEM=1
-
-cflags_def = -DTREZOR_MODEL=T -DTREZOR_EMULATOR -DMP_CONFIGFILE=\"embed/unix/mpconfigport.h\" -DMICROPY_USE_READLINE
-
+cflags_inc = -I. -Ivendor/trezor-crypto -Ivendor/micropython -Ivendor/micropython/ports/unix -Iembed/unix -Iembed/extmod/modtrezorui -I$builddir
+cflags_def = $
+    -DTREZOR_MODEL=T -DTREZOR_EMULATOR $
+    -DMP_CONFIGFILE=\"embed/unix/mpconfigport.h\" -DMICROPY_USE_READLINE $
+    -DAES_128 -DAES_192 -DUSE_KECCAK=1 -DUSE_ETHEREUM=1 -DUSE_MONERO=1 -DUSE_CARDANO=1 -DUSE_NEM=1 $
+    -DTREZOR_FONT_BOLD_ENABLE -DTREZOR_FONT_NORMAL_ENABLE -DTREZOR_FONT_MONO_ENABLE -DTREZOR_FONT_MONO_BOLD_ENABLE -DQR_MAX_VERSION=0
 cflags = $cflags_opt $cflags_debug $cflags_common $cflags_inc $cflags_def
 
 rule cc
@@ -366,58 +367,52 @@ build $builddir/embed/extmod/modtrezorconfig/storage.o: cc embed/extmod/modtrezo
 
 # modtrezorcrypto
 
-rule cc_modtrezorcrypto
-    deps = gcc
-    depfile = $out.d
-    command = $cc $cflags -c $in -o $out -MMD -MF $out.d $
-        -Ivendor/trezor-crypto -Wno-sequence-point -DAES_128 -DAES_192 -DUSE_KECCAK=1 -DUSE_ETHEREUM=1 -DUSE_MONERO=1 -DUSE_CARDANO=1 -DUSE_NEM=1
-
-build $builddir/embed/extmod/modtrezorcrypto/modtrezorcrypto.o: cc_modtrezorcrypto embed/extmod/modtrezorcrypto/modtrezorcrypto.c | $qstr
-build $builddir/embed/extmod/modtrezorcrypto/crc.o: cc_modtrezorcrypto embed/extmod/modtrezorcrypto/crc.c
-build $builddir/vendor/trezor-crypto/address.o: cc_modtrezorcrypto vendor/trezor-crypto/address.c
-build $builddir/vendor/trezor-crypto/aes/aescrypt.o: cc_modtrezorcrypto vendor/trezor-crypto/aes/aescrypt.c
-build $builddir/vendor/trezor-crypto/aes/aeskey.o: cc_modtrezorcrypto vendor/trezor-crypto/aes/aeskey.c
-build $builddir/vendor/trezor-crypto/aes/aes_modes.o: cc_modtrezorcrypto vendor/trezor-crypto/aes/aes_modes.c
-build $builddir/vendor/trezor-crypto/aes/aestab.o: cc_modtrezorcrypto vendor/trezor-crypto/aes/aestab.c
-build $builddir/vendor/trezor-crypto/base58.o: cc_modtrezorcrypto vendor/trezor-crypto/base58.c
-build $builddir/vendor/trezor-crypto/base32.o: cc_modtrezorcrypto vendor/trezor-crypto/base32.c
-build $builddir/vendor/trezor-crypto/bignum.o: cc_modtrezorcrypto vendor/trezor-crypto/bignum.c
-build $builddir/vendor/trezor-crypto/bip32.o: cc_modtrezorcrypto vendor/trezor-crypto/bip32.c
-build $builddir/vendor/trezor-crypto/bip39.o: cc_modtrezorcrypto vendor/trezor-crypto/bip39.c
-build $builddir/vendor/trezor-crypto/blake256.o: cc_modtrezorcrypto vendor/trezor-crypto/blake256.c
-build $builddir/vendor/trezor-crypto/blake2b.o: cc_modtrezorcrypto vendor/trezor-crypto/blake2b.c
-build $builddir/vendor/trezor-crypto/blake2s.o: cc_modtrezorcrypto vendor/trezor-crypto/blake2s.c
-build $builddir/vendor/trezor-crypto/curves.o: cc_modtrezorcrypto vendor/trezor-crypto/curves.c
-build $builddir/vendor/trezor-crypto/ecdsa.o: cc_modtrezorcrypto vendor/trezor-crypto/ecdsa.c
-build $builddir/vendor/trezor-crypto/chacha20poly1305/chacha20poly1305.o: cc_modtrezorcrypto vendor/trezor-crypto/chacha20poly1305/chacha20poly1305.c
-build $builddir/vendor/trezor-crypto/chacha20poly1305/chacha_merged.o: cc_modtrezorcrypto vendor/trezor-crypto/chacha20poly1305/chacha_merged.c
-build $builddir/vendor/trezor-crypto/chacha20poly1305/poly1305-donna.o: cc_modtrezorcrypto vendor/trezor-crypto/chacha20poly1305/poly1305-donna.c
-build $builddir/vendor/trezor-crypto/chacha20poly1305/rfc7539.o: cc_modtrezorcrypto vendor/trezor-crypto/chacha20poly1305/rfc7539.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/curve25519-donna-32bit.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/curve25519-donna-32bit.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/curve25519-donna-helpers.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/curve25519-donna-helpers.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/curve25519-donna-scalarmult-base.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/curve25519-donna-scalarmult-base.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/ed25519.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-donna-32bit-tables.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/ed25519-donna-32bit-tables.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-donna-basepoint-table.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/ed25519-donna-basepoint-table.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-donna-impl-base.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/ed25519-donna-impl-base.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-keccak.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/ed25519-keccak.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-sha3.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/ed25519-sha3.c
-build $builddir/vendor/trezor-crypto/ed25519-donna/modm-donna-32bit.o: cc_modtrezorcrypto vendor/trezor-crypto/ed25519-donna/modm-donna-32bit.c
-build $builddir/vendor/trezor-crypto/monero/base58.o: cc_modtrezorcrypto vendor/trezor-crypto/monero/base58.c
-build $builddir/vendor/trezor-crypto/monero/serialize.o: cc_modtrezorcrypto vendor/trezor-crypto/monero/serialize.c
-build $builddir/vendor/trezor-crypto/monero/xmr.o: cc_modtrezorcrypto vendor/trezor-crypto/monero/xmr.c
-build $builddir/vendor/trezor-crypto/groestl.o: cc_modtrezorcrypto vendor/trezor-crypto/groestl.c
-build $builddir/vendor/trezor-crypto/hasher.o: cc_modtrezorcrypto vendor/trezor-crypto/hasher.c
-build $builddir/vendor/trezor-crypto/hmac.o: cc_modtrezorcrypto vendor/trezor-crypto/hmac.c
-build $builddir/vendor/trezor-crypto/memzero.o: cc_modtrezorcrypto vendor/trezor-crypto/memzero.c
-build $builddir/vendor/trezor-crypto/nist256p1.o: cc_modtrezorcrypto vendor/trezor-crypto/nist256p1.c
-build $builddir/vendor/trezor-crypto/pbkdf2.o: cc_modtrezorcrypto vendor/trezor-crypto/pbkdf2.c
-build $builddir/vendor/trezor-crypto/rand.o: cc_modtrezorcrypto vendor/trezor-crypto/rand.c
-build $builddir/vendor/trezor-crypto/ripemd160.o: cc_modtrezorcrypto vendor/trezor-crypto/ripemd160.c
-build $builddir/vendor/trezor-crypto/secp256k1.o: cc_modtrezorcrypto vendor/trezor-crypto/secp256k1.c
-build $builddir/vendor/trezor-crypto/sha2.o: cc_modtrezorcrypto vendor/trezor-crypto/sha2.c
-build $builddir/vendor/trezor-crypto/sha3.o: cc_modtrezorcrypto vendor/trezor-crypto/sha3.c
-build $builddir/vendor/trezor-crypto/nem.o: cc_modtrezorcrypto vendor/trezor-crypto/nem.c
+build $builddir/embed/extmod/modtrezorcrypto/modtrezorcrypto.o: cc embed/extmod/modtrezorcrypto/modtrezorcrypto.c | $qstr
+build $builddir/embed/extmod/modtrezorcrypto/crc.o: cc embed/extmod/modtrezorcrypto/crc.c
+build $builddir/vendor/trezor-crypto/address.o: cc vendor/trezor-crypto/address.c
+build $builddir/vendor/trezor-crypto/aes/aescrypt.o: cc vendor/trezor-crypto/aes/aescrypt.c
+build $builddir/vendor/trezor-crypto/aes/aeskey.o: cc vendor/trezor-crypto/aes/aeskey.c
+build $builddir/vendor/trezor-crypto/aes/aes_modes.o: cc vendor/trezor-crypto/aes/aes_modes.c
+build $builddir/vendor/trezor-crypto/aes/aestab.o: cc vendor/trezor-crypto/aes/aestab.c
+build $builddir/vendor/trezor-crypto/base58.o: cc vendor/trezor-crypto/base58.c
+build $builddir/vendor/trezor-crypto/base32.o: cc vendor/trezor-crypto/base32.c
+build $builddir/vendor/trezor-crypto/bignum.o: cc vendor/trezor-crypto/bignum.c
+build $builddir/vendor/trezor-crypto/bip32.o: cc vendor/trezor-crypto/bip32.c
+build $builddir/vendor/trezor-crypto/bip39.o: cc vendor/trezor-crypto/bip39.c
+build $builddir/vendor/trezor-crypto/blake256.o: cc vendor/trezor-crypto/blake256.c
+build $builddir/vendor/trezor-crypto/blake2b.o: cc vendor/trezor-crypto/blake2b.c
+build $builddir/vendor/trezor-crypto/blake2s.o: cc vendor/trezor-crypto/blake2s.c
+build $builddir/vendor/trezor-crypto/curves.o: cc vendor/trezor-crypto/curves.c
+build $builddir/vendor/trezor-crypto/ecdsa.o: cc vendor/trezor-crypto/ecdsa.c
+build $builddir/vendor/trezor-crypto/chacha20poly1305/chacha20poly1305.o: cc vendor/trezor-crypto/chacha20poly1305/chacha20poly1305.c
+build $builddir/vendor/trezor-crypto/chacha20poly1305/chacha_merged.o: cc vendor/trezor-crypto/chacha20poly1305/chacha_merged.c
+build $builddir/vendor/trezor-crypto/chacha20poly1305/poly1305-donna.o: cc vendor/trezor-crypto/chacha20poly1305/poly1305-donna.c
+build $builddir/vendor/trezor-crypto/chacha20poly1305/rfc7539.o: cc vendor/trezor-crypto/chacha20poly1305/rfc7539.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/curve25519-donna-32bit.o: cc vendor/trezor-crypto/ed25519-donna/curve25519-donna-32bit.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/curve25519-donna-helpers.o: cc vendor/trezor-crypto/ed25519-donna/curve25519-donna-helpers.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/curve25519-donna-scalarmult-base.o: cc vendor/trezor-crypto/ed25519-donna/curve25519-donna-scalarmult-base.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519.o: cc vendor/trezor-crypto/ed25519-donna/ed25519.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-donna-32bit-tables.o: cc vendor/trezor-crypto/ed25519-donna/ed25519-donna-32bit-tables.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-donna-basepoint-table.o: cc vendor/trezor-crypto/ed25519-donna/ed25519-donna-basepoint-table.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-donna-impl-base.o: cc vendor/trezor-crypto/ed25519-donna/ed25519-donna-impl-base.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-keccak.o: cc vendor/trezor-crypto/ed25519-donna/ed25519-keccak.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/ed25519-sha3.o: cc vendor/trezor-crypto/ed25519-donna/ed25519-sha3.c
+build $builddir/vendor/trezor-crypto/ed25519-donna/modm-donna-32bit.o: cc vendor/trezor-crypto/ed25519-donna/modm-donna-32bit.c
+build $builddir/vendor/trezor-crypto/monero/base58.o: cc vendor/trezor-crypto/monero/base58.c
+build $builddir/vendor/trezor-crypto/monero/serialize.o: cc vendor/trezor-crypto/monero/serialize.c
+build $builddir/vendor/trezor-crypto/monero/xmr.o: cc vendor/trezor-crypto/monero/xmr.c
+build $builddir/vendor/trezor-crypto/groestl.o: cc vendor/trezor-crypto/groestl.c
+build $builddir/vendor/trezor-crypto/hasher.o: cc vendor/trezor-crypto/hasher.c
+build $builddir/vendor/trezor-crypto/hmac.o: cc vendor/trezor-crypto/hmac.c
+build $builddir/vendor/trezor-crypto/memzero.o: cc vendor/trezor-crypto/memzero.c
+build $builddir/vendor/trezor-crypto/nist256p1.o: cc vendor/trezor-crypto/nist256p1.c
+build $builddir/vendor/trezor-crypto/pbkdf2.o: cc vendor/trezor-crypto/pbkdf2.c
+build $builddir/vendor/trezor-crypto/rand.o: cc vendor/trezor-crypto/rand.c
+build $builddir/vendor/trezor-crypto/ripemd160.o: cc vendor/trezor-crypto/ripemd160.c
+build $builddir/vendor/trezor-crypto/secp256k1.o: cc vendor/trezor-crypto/secp256k1.c
+build $builddir/vendor/trezor-crypto/sha2.o: cc vendor/trezor-crypto/sha2.c
+build $builddir/vendor/trezor-crypto/sha3.o: cc vendor/trezor-crypto/sha3.c
+build $builddir/vendor/trezor-crypto/nem.o: cc vendor/trezor-crypto/nem.c
 
 # modtrezorio
 
@@ -425,21 +420,15 @@ build $builddir/embed/extmod/modtrezorio/modtrezorio.o: cc embed/extmod/modtrezo
 
 # modtrezorui
 
-rule cc_modtrezorui
-    deps = gcc
-    depfile = $out.d
-    command = $cc $cflags -c $in -o $out -MMD -MF $out.d $
-        -DTREZOR_FONT_BOLD_ENABLE -DTREZOR_FONT_NORMAL_ENABLE -DTREZOR_FONT_MONO_ENABLE -DTREZOR_FONT_MONO_BOLD_ENABLE -DQR_MAX_VERSION=0
-
-build $builddir/embed/extmod/modtrezorui/display.o: cc_modtrezorui embed/extmod/modtrezorui/display.c | $qstr
-build $builddir/embed/extmod/modtrezorui/inflate.o: cc_modtrezorui embed/extmod/modtrezorui/inflate.c | $qstr
-build $builddir/embed/extmod/modtrezorui/font_bitmap.o: cc_modtrezorui embed/extmod/modtrezorui/font_bitmap.c | $qstr
-build $builddir/embed/extmod/modtrezorui/font_roboto_bold_20.o: cc_modtrezorui embed/extmod/modtrezorui/font_roboto_bold_20.c | $qstr
-build $builddir/embed/extmod/modtrezorui/font_roboto_regular_20.o: cc_modtrezorui embed/extmod/modtrezorui/font_roboto_regular_20.c | $qstr
-build $builddir/embed/extmod/modtrezorui/font_robotomono_bold_20.o: cc_modtrezorui embed/extmod/modtrezorui/font_robotomono_bold_20.c | $qstr
-build $builddir/embed/extmod/modtrezorui/font_robotomono_regular_20.o: cc_modtrezorui embed/extmod/modtrezorui/font_robotomono_regular_20.c | $qstr
-build $builddir/embed/extmod/modtrezorui/modtrezorui.o: cc_modtrezorui embed/extmod/modtrezorui/modtrezorui.c | $qstr
-build $builddir/embed/extmod/modtrezorui/trezor-qrenc/qr_encode.o: cc_modtrezorui embed/extmod/modtrezorui/trezor-qrenc/qr_encode.c | $qstr
+build $builddir/embed/extmod/modtrezorui/display.o: cc embed/extmod/modtrezorui/display.c | $qstr
+build $builddir/embed/extmod/modtrezorui/inflate.o: cc embed/extmod/modtrezorui/inflate.c | $qstr
+build $builddir/embed/extmod/modtrezorui/font_bitmap.o: cc embed/extmod/modtrezorui/font_bitmap.c | $qstr
+build $builddir/embed/extmod/modtrezorui/font_roboto_bold_20.o: cc embed/extmod/modtrezorui/font_roboto_bold_20.c | $qstr
+build $builddir/embed/extmod/modtrezorui/font_roboto_regular_20.o: cc embed/extmod/modtrezorui/font_roboto_regular_20.c | $qstr
+build $builddir/embed/extmod/modtrezorui/font_robotomono_bold_20.o: cc embed/extmod/modtrezorui/font_robotomono_bold_20.c | $qstr
+build $builddir/embed/extmod/modtrezorui/font_robotomono_regular_20.o: cc embed/extmod/modtrezorui/font_robotomono_regular_20.c | $qstr
+build $builddir/embed/extmod/modtrezorui/modtrezorui.o: cc embed/extmod/modtrezorui/modtrezorui.c | $qstr
+build $builddir/embed/extmod/modtrezorui/trezor-qrenc/qr_encode.o: cc embed/extmod/modtrezorui/trezor-qrenc/qr_encode.c | $qstr
 
 # modtrezorutils
 
