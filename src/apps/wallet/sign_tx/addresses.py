@@ -258,7 +258,9 @@ def validate_purpose_against_script_type(
     return True
 
 
-def validate_path_for_bitcoin_public_key(path: list, coin: CoinInfo) -> bool:
+def validate_path_for_bitcoin_public_key(
+    path: list, coin: CoinInfo, script_type: InputScriptType
+) -> bool:
     """
     Validates derivation path to fit Bitcoin-like coins for GetPublicKey.
     Script type is omitted here because it is not usually sent.
@@ -268,6 +270,8 @@ def validate_path_for_bitcoin_public_key(path: list, coin: CoinInfo) -> bool:
         return False
 
     if not validate_purpose(path[0], coin):
+        return False
+    if not validate_purpose_against_script_type(path[0], script_type):
         return False
 
     if path[1] != coin.slip44 | HARDENED:

@@ -11,27 +11,30 @@ async def get_public_key(ctx, msg, keychain):
     coin_name = msg.coin_name or "Bitcoin"
     coin = coins.by_name(coin_name)
     curve_name = msg.ecdsa_curve_name or coin.curve_name
-    script_type = msg.script_type or InputScriptType.SPENDADDRESS
 
     await paths.validate_path(
-        ctx, validate_path_for_bitcoin_public_key, path=msg.address_n, coin=coin
+        ctx,
+        validate_path_for_bitcoin_public_key,
+        path=msg.address_n,
+        coin=coin,
+        script_type=msg.script_type,
     )
     node = keychain.derive(msg.address_n, curve_name=curve_name)
 
     if (
-        script_type in [InputScriptType.SPENDADDRESS, InputScriptType.SPENDMULTISIG]
+        msg.script_type in (InputScriptType.SPENDADDRESS, InputScriptType.SPENDMULTISIG)
         and coin.xpub_magic is not None
     ):
         node_xpub = node.serialize_public(coin.xpub_magic)
     elif (
         coin.segwit
-        and script_type == InputScriptType.SPENDP2SHWITNESS
+        and msg.script_type == InputScriptType.SPENDP2SHWITNESS
         and coin.xpub_magic_segwit_p2sh is not None
     ):
         node_xpub = node.serialize_public(coin.xpub_magic_segwit_p2sh)
     elif (
         coin.segwit
-        and script_type == InputScriptType.SPENDWITNESS
+        and msg.script_type == InputScriptType.SPENDWITNESS
         and coin.xpub_magic_segwit_native is not None
     ):
         node_xpub = node.serialize_public(coin.xpub_magic_segwit_native)
