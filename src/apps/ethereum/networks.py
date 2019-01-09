@@ -82,14 +82,14 @@ NETWORKS = [
     NetworkInfo(
         chain_id=30,
         slip44=137,
-        shortcut="RSK",
+        shortcut="RBTC",
         name="RSK",
         rskip60=True,
     ),
     NetworkInfo(
         chain_id=31,
         slip44=37310,
-        shortcut="tRSK",
+        shortcut="tRBTC",
         name="RSK Testnet",
         rskip60=True,
     ),
@@ -161,6 +161,13 @@ NETWORKS = [
         slip44=2018,
         shortcut="EOSC",
         name="EOS Classic",
+        rskip60=False,
+    ),
+    NetworkInfo(
+        chain_id=2894,
+        slip44=2894,
+        shortcut="REOSC",
+        name="REOSC Ecosystem",
         rskip60=False,
     ),
     NetworkInfo(
