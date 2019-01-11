@@ -4,6 +4,7 @@ from trezor.pin import pin_to_int, show_pin_timeout
 from apps.common import storage
 from apps.common.request_pin import request_pin
 
+
 async def bootscreen():
     while True:
         try:
