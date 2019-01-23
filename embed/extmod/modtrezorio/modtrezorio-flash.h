@@ -38,9 +38,9 @@ STATIC mp_obj_t mod_trezorio_FlashOTP_make_new(const mp_obj_type_t *type, size_t
     return MP_OBJ_FROM_PTR(o);
 }
 
-/// def FlashOTP.write(self, block: int, offset: int, data: bytes) -> None:
+/// def write(self, block: int, offset: int, data: bytes) -> None:
 ///     '''
-///     Writes data to OTP flash
+///     Writes data to OTP flash.
 ///     '''
 STATIC mp_obj_t mod_trezorio_FlashOTP_write(size_t n_args, const mp_obj_t *args) {
     uint8_t block = trezor_obj_get_uint8(args[1]);
@@ -54,9 +54,9 @@ STATIC mp_obj_t mod_trezorio_FlashOTP_write(size_t n_args, const mp_obj_t *args)
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorio_FlashOTP_write_obj, 4, 4, mod_trezorio_FlashOTP_write);
 
-/// def FlashOTP.read(self, block: int, offset: int, data: bytearray) -> None:
+/// def read(self, block: int, offset: int, data: bytearray) -> None:
 ///     '''
-///     Reads data from OTP flash
+///     Reads data from OTP flash.
 ///     '''
 STATIC mp_obj_t mod_trezorio_FlashOTP_read(size_t n_args, const mp_obj_t *args) {
     uint8_t block = trezor_obj_get_uint8(args[1]);
@@ -70,9 +70,9 @@ STATIC mp_obj_t mod_trezorio_FlashOTP_read(size_t n_args, const mp_obj_t *args) 
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorio_FlashOTP_read_obj, 4, 4, mod_trezorio_FlashOTP_read);
 
-/// def FlashOTP.lock(self, block: int) -> None:
+/// def lock(self, block: int) -> None:
 ///     '''
-///     Lock OTP flash block
+///     Lock OTP flash block.
 ///     '''
 STATIC mp_obj_t mod_trezorio_FlashOTP_lock(mp_obj_t self, mp_obj_t block) {
     uint8_t b = trezor_obj_get_uint8(block);
@@ -83,7 +83,7 @@ STATIC mp_obj_t mod_trezorio_FlashOTP_lock(mp_obj_t self, mp_obj_t block) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_FlashOTP_lock_obj, mod_trezorio_FlashOTP_lock);
 
-/// def FlashOTP.is_locked(self, block: int) -> bool:
+/// def is_locked(self, block: int) -> bool:
 ///     '''
 ///     Is OTP flash block locked?
 ///     '''

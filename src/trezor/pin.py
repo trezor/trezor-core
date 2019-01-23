@@ -5,7 +5,7 @@ def pin_to_int(pin: str) -> int:
     return int("1" + pin)
 
 
-def show_pin_timeout(seconds: int, progress: int):
+def show_pin_timeout(seconds: int, progress: int) -> None:
     if progress == 0:
         ui.display.bar(0, 0, ui.WIDTH, ui.HEIGHT, ui.BG)
         ui.display.text_center(

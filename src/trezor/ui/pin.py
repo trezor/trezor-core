@@ -5,21 +5,24 @@ from trezor.crypto import random
 from trezor.ui import display
 from trezor.ui.button import BTN_CLICKED, Button
 
+if False:
+    from typing import List  # noqa: F401
 
-def digit_area(i):
+
+def digit_area(i: int) -> ui.Area:
     if i == 9:  # 0-position
         i = 10  # display it in the middle
     return ui.grid(i + 3)  # skip the first line
 
 
-def generate_digits():
+def generate_digits() -> List[int]:
     digits = list(range(0, 10))  # 0-9
     random.shuffle(digits)
     return digits
 
 
 class PinMatrix(ui.Widget):
-    def __init__(self, label, pin="", maxlength=9):
+    def __init__(self, label: str, pin: str = "", maxlength: int = 9) -> None:
         self.label = label
         self.pin = pin
         self.maxlength = maxlength
@@ -34,12 +37,12 @@ class PinMatrix(ui.Widget):
         ]
         self.onchange = None
 
-    def taint(self):
+    def taint(self) -> None:
         super().taint()
         for btn in self.pin_buttons:
             btn.taint()
 
-    def render(self):
+    def render(self) -> None:
         # pin matrix buttons
         for btn in self.pin_buttons:
             btn.render()
@@ -66,14 +69,14 @@ class PinMatrix(ui.Widget):
 
         self.tainted = False
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: ui.Pos) -> None:
         for btn in self.pin_buttons:
             if btn.touch(event, pos) == BTN_CLICKED:
                 if len(self.pin) < self.maxlength:
                     self.change(self.pin + btn.content)
                 break
 
-    def change(self, pin):
+    def change(self, pin: str) -> None:
         self.tainted = True
         self.pin = pin
         for btn in self.pin_buttons:

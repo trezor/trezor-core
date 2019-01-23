@@ -1,22 +1,25 @@
 from trezor import loop
 
-workflows = []
-layouts = []
-default = None
-default_layout = None
+if False:
+    from typing import Coroutine, List, Optional, Callable  # noqa: F401
+
+workflows = []  # type: List[Coroutine]
+layouts = []  # type: List[Coroutine]
+default = None  # type: Optional[Coroutine]
+default_layout = None  # type: Optional[Callable[[], Coroutine]]
 
 
-def onstart(w):
+def onstart(w: Coroutine) -> None:
     workflows.append(w)
 
 
-def onclose(w):
+def onclose(w: Coroutine) -> None:
     workflows.remove(w)
-    if not layouts and default_layout:
+    if not layouts and default_layout is not None:
         startdefault(default_layout)
 
 
-def closedefault():
+def closedefault() -> None:
     global default
 
     if default:
@@ -24,7 +27,7 @@ def closedefault():
         default = None
 
 
-def startdefault(layout):
+def startdefault(layout: Callable[[], Coroutine]) -> None:
     global default
     global default_layout
 
@@ -34,18 +37,19 @@ def startdefault(layout):
         loop.schedule(default)
 
 
-def restartdefault():
+def restartdefault() -> None:
     global default_layout
     d = default_layout
     closedefault()
-    startdefault(d)
+    if d is not None:
+        startdefault(d)
 
 
-def onlayoutstart(l):
+def onlayoutstart(l: Coroutine) -> None:
     closedefault()
     layouts.append(l)
 
 
-def onlayoutclose(l):
+def onlayoutclose(l: Coroutine) -> None:
     if l in layouts:
         layouts.remove(l)

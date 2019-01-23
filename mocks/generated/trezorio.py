@@ -9,22 +9,22 @@ class FlashOTP:
         '''
         '''
 
-    def FlashOTP.write(self, block: int, offset: int, data: bytes) -> None:
+    def write(self, block: int, offset: int, data: bytes) -> None:
         '''
-        Writes data to OTP flash
-        '''
-
-    def FlashOTP.read(self, block: int, offset: int, data: bytearray) -> None:
-        '''
-        Reads data from OTP flash
+        Writes data to OTP flash.
         '''
 
-    def FlashOTP.lock(self, block: int) -> None:
+    def read(self, block: int, offset: int, data: bytearray) -> None:
         '''
-        Lock OTP flash block
+        Reads data from OTP flash.
         '''
 
-    def FlashOTP.is_locked(self, block: int) -> bool:
+    def lock(self, block: int) -> None:
+        '''
+        Lock OTP flash block.
+        '''
+
+    def is_locked(self, block: int) -> bool:
         '''
         Is OTP flash block locked?
         '''
@@ -128,12 +128,12 @@ class USB:
     '''
 
     def __init__(self,
-                 device_class: int=0,
-                 device_subclass: int=0,
-                 device_protocol: int=0,
                  vendor_id: int,
                  product_id: int,
                  release_num: int,
+                 device_class: int=0,
+                 device_subclass: int=0,
+                 device_protocol: int=0,
                  manufacturer: str='',
                  product: str='',
                  serial_number: str='',
@@ -204,3 +204,10 @@ class WebUSB:
         '''
         Sends message using USB WebUSB (device) or UDP (emulator).
         '''
+POLL_READ: int  # wait until interface is readable and return read data
+POLL_WRITE: int  # wait until interface is writable
+TOUCH: int  # interface id of the touch events
+TOUCH_START: int  # event id of touch start event
+TOUCH_MOVE: int  # event id of touch move event
+TOUCH_END: int  # event id of touch end event
+WireInterface = Union[HID, WebUSB]

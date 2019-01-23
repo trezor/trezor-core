@@ -3,23 +3,26 @@ from micropython import const
 
 from trezor import loop, res, ui
 
+if False:
+    from typing import Coroutine, Dict, Optional  # noqa: F401
+
 _TARGET_MS = const(1000)
 _SHRINK_BY = const(2)
 
 
 class Loader(ui.Widget):
-    def __init__(self, style=ui.LDR_DEFAULT):
+    def __init__(self, style: Dict = ui.LDR_DEFAULT) -> None:
         self.target_ms = _TARGET_MS
         self.normal_style = style["normal"] or ui.LDR_DEFAULT["normal"]
         self.active_style = style["active"] or ui.LDR_DEFAULT["active"]
-        self.start_ms = None
-        self.stop_ms = None
+        self.start_ms = None  # type: Optional[int]
+        self.stop_ms = None  # type: Optional[int]
 
-    def start(self):
+    def start(self) -> None:
         self.start_ms = utime.ticks_ms()
         self.stop_ms = None
 
-    def stop(self):
+    def stop(self) -> int:
         if self.start_ms is not None and self.stop_ms is None:
             diff_ms = utime.ticks_ms() - self.start_ms
         else:
@@ -27,10 +30,10 @@ class Loader(ui.Widget):
         self.stop_ms = utime.ticks_ms()
         return diff_ms >= self.target_ms
 
-    def is_active(self):
+    def is_active(self) -> bool:
         return self.start_ms is not None
 
-    def render(self):
+    def render(self) -> None:
         target = self.target_ms
         start = self.start_ms
         stop = self.stop_ms
@@ -60,7 +63,7 @@ class Loader(ui.Widget):
                 s["icon-fg-color"],
             )
 
-    def __iter__(self):
+    def __iter__(self) -> Coroutine:  # type: ignore
         sleep = loop.sleep(1000000 // 30)  # 30 fps
         ui.display.bar(0, 32, ui.WIDTH, ui.HEIGHT - 83, ui.BG)  # clear
         while self.is_active():

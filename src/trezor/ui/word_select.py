@@ -7,6 +7,9 @@ from trezor.ui.button import BTN_CLICKED, Button
 if __debug__:
     from apps.debug import input_signal
 
+if False:
+    from typing import Any, Optional  # noqa: F401
+
 
 _W12 = const(12)
 _W18 = const(18)
@@ -14,7 +17,7 @@ _W24 = const(24)
 
 
 class WordSelector(Widget):
-    def __init__(self, content):
+    def __init__(self, content: ui.Widget) -> None:
         self.content = content
         self.w12 = Button(
             ui.grid(6, n_y=4, n_x=3, cells_y=2), str(_W12), style=ui.BTN_KEY
@@ -26,26 +29,27 @@ class WordSelector(Widget):
             ui.grid(8, n_y=4, n_x=3, cells_y=2), str(_W24), style=ui.BTN_KEY
         )
 
-    def taint(self):
+    def taint(self) -> None:
         super().taint()
         self.w12.taint()
         self.w18.taint()
         self.w24.taint()
 
-    def render(self):
+    def render(self) -> None:
         self.w12.render()
         self.w18.render()
         self.w24.render()
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: ui.Pos) -> Optional[int]:
         if self.w12.touch(event, pos) == BTN_CLICKED:
             return _W12
         if self.w18.touch(event, pos) == BTN_CLICKED:
             return _W18
         if self.w24.touch(event, pos) == BTN_CLICKED:
             return _W24
+        return None
 
-    async def __iter__(self):
+    async def __iter__(self) -> Any:
         if __debug__:
             result = await loop.spawn(super().__iter__(), self.content, input_signal)
             if isinstance(result, str):

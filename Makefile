@@ -87,6 +87,10 @@ cstyle: ## run code style check on low-level C code
 
 ## code generation:
 
+mypy:
+	mypy \
+		src/main.py
+
 templates: ## render Mako templates (for lists of coins, tokens, etc.)
 	./tools/build_templates
 

@@ -6,8 +6,15 @@ from trezor.wire import protobuf_workflow, register
 
 from apps.common import cache, storage
 
+if False:
+    from trezor.messages.Cancel import Cancel
+    from trezor.messages.ClearSession import ClearSession
+    from trezor.messages.GetFeatures import GetFeatures
+    from trezor.messages.Initialize import Initialize
+    from trezor.messages.Ping import Ping
 
-def get_features():
+
+def get_features() -> Features:
     f = Features()
     f.vendor = "trezor.io"
     f.language = "english"
@@ -30,26 +37,26 @@ def get_features():
     return f
 
 
-async def handle_Initialize(ctx, msg):
+async def handle_Initialize(ctx: wire.Context, msg: Initialize) -> Features:
     if msg.state is None or msg.state != cache.get_state(prev_state=bytes(msg.state)):
         cache.clear(msg.skip_passphrase)
     return get_features()
 
 
-async def handle_GetFeatures(ctx, msg):
+async def handle_GetFeatures(ctx: wire.Context, msg: GetFeatures) -> Features:
     return get_features()
 
 
-async def handle_Cancel(ctx, msg):
-    raise wire.ActionCancelled("Cancelled")
-
-
-async def handle_ClearSession(ctx, msg):
+async def handle_ClearSession(ctx: wire.Context, msg: ClearSession) -> Success:
     cache.clear()
     return Success(message="Session cleared")
 
 
-async def handle_Ping(ctx, msg):
+async def handle_Cancel(ctx: wire.Context, msg: Cancel) -> None:
+    raise wire.ActionCancelled("Cancelled")
+
+
+async def handle_Ping(ctx: wire.Context, msg: Ping) -> Success:
     if msg.button_protection:
         from apps.common.confirm import require_confirm
         from trezor.messages.ButtonRequestType import ProtectCall
@@ -63,9 +70,9 @@ async def handle_Ping(ctx, msg):
     return Success(message=msg.message)
 
 
-def boot():
+def boot() -> None:
     register(MessageType.Initialize, protobuf_workflow, handle_Initialize)
     register(MessageType.GetFeatures, protobuf_workflow, handle_GetFeatures)
-    register(MessageType.Cancel, protobuf_workflow, handle_Cancel)
     register(MessageType.ClearSession, protobuf_workflow, handle_ClearSession)
+    register(MessageType.Cancel, protobuf_workflow, handle_Cancel)
     register(MessageType.Ping, protobuf_workflow, handle_Ping)

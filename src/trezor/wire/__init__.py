@@ -5,10 +5,14 @@ from trezor.wire.errors import *
 
 from apps.common import seed
 
-workflow_handlers = {}
+if False:
+    from typing import Any, Awaitable, Callable, Dict, Iterable, Tuple  # noqa: F401
+    from trezorio import WireInterface  # noqa: F401
+
+workflow_handlers = {}  # type: Dict[int, Tuple[Callable, Iterable]]
 
 
-def add(mtype, pkgname, modname, namespace=None):
+def add(mtype: int, pkgname: str, modname: str, namespace: List) -> None:
     """Shortcut for registering a dynamically-imported Protobuf workflow."""
     if namespace is not None:
         register(
@@ -24,7 +28,7 @@ def add(mtype, pkgname, modname, namespace=None):
         register(mtype, protobuf_workflow, import_workflow, pkgname, modname)
 
 
-def register(mtype, handler, *args):
+def register(mtype: int, handler: Callable, *args: Any) -> None:
     """Register `handler` to get scheduled after `mtype` message is received."""
     if isinstance(mtype, type) and issubclass(mtype, protobuf.MessageType):
         mtype = mtype.MESSAGE_WIRE_TYPE
@@ -33,17 +37,19 @@ def register(mtype, handler, *args):
     workflow_handlers[mtype] = (handler, args)
 
 
-def setup(iface):
+def setup(iface: WireInterface) -> None:
     """Initialize the wire stack on passed USB interface."""
     loop.schedule(session_handler(iface, codec_v1.SESSION_ID))
 
 
 class Context:
-    def __init__(self, iface, sid):
+    def __init__(self, iface: WireInterface, sid: int) -> None:
         self.iface = iface
         self.sid = sid
 
-    async def call(self, msg, *types):
+    async def call(
+        self, msg: protobuf.MessageType, *types: int
+    ) -> protobuf.MessageType:
         """
         Reply with `msg` and wait for one of `types`. See `self.write()` and
         `self.read()`.
@@ -52,7 +58,7 @@ class Context:
         del msg
         return await self.read(types)
 
-    async def read(self, types):
+    async def read(self, types: Tuple[int, ...]) -> protobuf.MessageType:
         """
         Wait for incoming message on this wire context and return it.  Raises
         `UnexpectedMessageError` if the message type does not match one of
@@ -76,7 +82,7 @@ class Context:
         pbtype = messages.get_type(reader.type)
         return await protobuf.load_message(reader, pbtype)
 
-    async def write(self, msg):
+    async def write(self, msg: protobuf.MessageType) -> None:
         """
         Write a protobuf message to this wire context.
         """
@@ -96,7 +102,7 @@ class Context:
         await protobuf.dump_message(writer, msg, fields)
         await writer.aclose()
 
-    def wait(self, *tasks):
+    def wait(self, *tasks: Awaitable) -> Any:
         """
         Wait until one of the passed tasks finishes, and return the result,
         while servicing the wire context.  If a message comes until one of the
@@ -104,20 +110,20 @@ class Context:
         """
         return loop.spawn(self.read(()), *tasks)
 
-    def getreader(self):
+    def getreader(self) -> codec_v1.Reader:
         return codec_v1.Reader(self.iface)
 
-    def getwriter(self):
+    def getwriter(self) -> codec_v1.Writer:
         return codec_v1.Writer(self.iface)
 
 
 class UnexpectedMessageError(Exception):
-    def __init__(self, reader):
+    def __init__(self, reader: codec_v1.Reader) -> None:
         super().__init__()
         self.reader = reader
 
 
-async def session_handler(iface, sid):
+async def session_handler(iface: WireInterface, sid: int) -> None:
     reader = None
     ctx = Context(iface, sid)
     while True:
@@ -157,7 +163,9 @@ async def session_handler(iface, sid):
         reader = None
 
 
-async def protobuf_workflow(ctx, reader, handler, *args):
+async def protobuf_workflow(
+    ctx: Context, reader: codec_v1.Reader, handler: Awaitable, *args: Any
+) -> None:
     from trezor.messages.Failure import Failure
 
     req = await protobuf.load_message(reader, messages.get_type(reader.type))

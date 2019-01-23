@@ -8,13 +8,13 @@ def init() -> None:
     '''
 
 # extmod/modtrezorconfig/modtrezorconfig.c
-def check_pin(pin: int, waitcallback: (int, int -> None)) -> bool:
+def check_pin(pin: int, waitcallback: Callable[[int, int], None]) -> bool:
     '''
     Check the given PIN. Returns True on success, False on failure.
     '''
 
 # extmod/modtrezorconfig/modtrezorconfig.c
-def unlock(pin: int, waitcallback: (int, int -> None)) -> bool:
+def unlock(pin: int, waitcallback: Callable[[int, int], None]) -> bool:
     '''
     Attempts to unlock the storage with given PIN.  Returns True on
     success, False on failure.
@@ -27,19 +27,19 @@ def has_pin() -> bool:
     '''
 
 # extmod/modtrezorconfig/modtrezorconfig.c
-def change_pin(pin: int, newpin: int, waitcallback: (int, int -> None)) -> bool:
+def change_pin(pin: int, newpin: int, waitcallback: Callable[[int, int], None]) -> bool:
     '''
     Change PIN. Returns True on success, False on failure.
     '''
 
 # extmod/modtrezorconfig/modtrezorconfig.c
-def get(app: int, key: int, public: bool=False) -> bytes:
+def get(app: int, key: int, public: bool = False) -> bytes:
     '''
     Gets a value of given key for given app (or empty bytes if not set).
     '''
 
 # extmod/modtrezorconfig/modtrezorconfig.c
-def set(app: int, key: int, value: bytes, public: bool=False) -> None:
+def set(app: int, key: int, value: bytes, public: bool = False) -> None:
     '''
     Sets a value of given key for given app.
     '''

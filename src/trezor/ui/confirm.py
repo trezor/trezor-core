@@ -1,12 +1,14 @@
 from micropython import const
 
 from trezor import loop, res, ui
-from trezor.ui import Widget
 from trezor.ui.button import BTN_ACTIVE, BTN_CLICKED, Button
 from trezor.ui.loader import Loader
 
 if __debug__:
     from apps.debug import confirm_signal
+
+if False:
+    from typing import Any, Dict, Optional, Tuple, Union  # noqa: F401
 
 CONFIRMED = const(1)
 CANCELLED = const(2)
@@ -14,15 +16,15 @@ DEFAULT_CONFIRM = res.load(ui.ICON_CONFIRM)
 DEFAULT_CANCEL = res.load(ui.ICON_CANCEL)
 
 
-class ConfirmDialog(Widget):
+class ConfirmDialog(ui.Widget):
     def __init__(
         self,
-        content,
-        confirm=DEFAULT_CONFIRM,
-        cancel=DEFAULT_CANCEL,
-        confirm_style=ui.BTN_CONFIRM,
-        cancel_style=ui.BTN_CANCEL,
-    ):
+        content: ui.Widget,
+        confirm: Union[str, bytes] = DEFAULT_CONFIRM,
+        cancel: Union[str, bytes] = DEFAULT_CANCEL,
+        confirm_style: Dict = ui.BTN_CONFIRM,
+        cancel_style: Dict = ui.BTN_CANCEL,
+    ) -> None:
         self.content = content
         if cancel is not None:
             self.confirm = Button(ui.grid(9, n_x=2), confirm, style=confirm_style)
@@ -31,19 +33,20 @@ class ConfirmDialog(Widget):
             self.confirm = Button(ui.grid(4, n_x=1), confirm, style=confirm_style)
             self.cancel = None
 
-    def render(self):
+    def render(self) -> None:
         self.confirm.render()
         if self.cancel is not None:
             self.cancel.render()
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: ui.Pos) -> Any:
         if self.confirm.touch(event, pos) == BTN_CLICKED:
             return CONFIRMED
         if self.cancel is not None:
             if self.cancel.touch(event, pos) == BTN_CLICKED:
                 return CANCELLED
+        return None
 
-    async def __iter__(self):
+    async def __iter__(self) -> Any:
         if __debug__:
             return await loop.spawn(super().__iter__(), self.content, confirm_signal)
         else:
@@ -54,14 +57,14 @@ _STARTED = const(-1)
 _STOPPED = const(-2)
 
 
-class HoldToConfirmDialog(Widget):
+class HoldToConfirmDialog(ui.Widget):
     def __init__(
         self,
-        content,
-        hold="Hold to confirm",
-        button_style=ui.BTN_CONFIRM,
-        loader_style=ui.LDR_DEFAULT,
-    ):
+        content: ui.Widget,
+        hold: Union[str, bytes] = "Hold to confirm",
+        button_style: Dict = ui.BTN_CONFIRM,
+        loader_style: Dict = ui.LDR_DEFAULT,
+    ) -> None:
         self.content = content
         self.button = Button(ui.grid(4, n_x=1), hold, style=button_style)
         self.loader = Loader(style=loader_style)
@@ -71,17 +74,17 @@ class HoldToConfirmDialog(Widget):
                 "HoldToConfirmDialog does not support widgets with custom event loop"
             )
 
-    def taint(self):
+    def taint(self) -> None:
         super().taint()
         self.button.taint()
         self.content.taint()
 
-    def render(self):
+    def render(self) -> None:
         self.button.render()
         if not self.loader.is_active():
             self.content.render()
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: ui.Pos) -> Any:
         button = self.button
         was_active = button.state == BTN_ACTIVE
         button.touch(event, pos)
@@ -97,7 +100,7 @@ class HoldToConfirmDialog(Widget):
             else:
                 return _STOPPED
 
-    async def __iter__(self):
+    async def __iter__(self) -> Any:
         result = None
         while result is None or result < 0:  # _STARTED or _STOPPED
             if self.loader.is_active():

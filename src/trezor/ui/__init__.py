@@ -5,12 +5,18 @@ from trezorui import Display
 
 from trezor import io, loop, res, utils, workflow
 
+if False:
+    from typing import Any, Callable, Generator, Iterator, Optional, Tuple  # noqa: F401
+
+    Pos = Tuple[int, int]
+    Area = Tuple[int, int, int, int]
+
 display = Display()
 
 # in debug mode, display an indicator in top right corner
 if __debug__:
 
-    def debug_display_refresh():
+    def debug_display_refresh() -> None:
         display.bar(Display.WIDTH - 8, 0, 8, 8, 0xF800)
         display.refresh()
 
@@ -24,7 +30,6 @@ elif utils.EMULATOR:
 NORMAL = Display.FONT_NORMAL
 BOLD = Display.FONT_BOLD
 MONO = Display.FONT_MONO
-MONO_BOLD = Display.FONT_MONO_BOLD
 SIZE = Display.FONT_SIZE
 WIDTH = Display.WIDTH
 HEIGHT = Display.HEIGHT
@@ -50,13 +55,13 @@ def blend(ca: int, cb: int, t: float) -> int:
 from trezor.ui.style import *  # isort:skip
 
 
-def contains(area: tuple, pos: tuple) -> bool:
+def contains(area: Area, pos: Pos) -> bool:
     x, y = pos
     ax, ay, aw, ah = area
     return ax <= x <= ax + aw and ay <= y <= ay + ah
 
 
-def rotate(pos: tuple) -> tuple:
+def rotate(pos: Pos) -> Pos:
     r = display.orientation()
     if r == 0:
         return pos
@@ -67,42 +72,45 @@ def rotate(pos: tuple) -> tuple:
         return (WIDTH - x, HEIGHT - y)
     if r == 270:
         return (HEIGHT - y, x)
+    raise ValueError()
 
 
-def pulse(delay: int):
+def pulse(delay: int) -> Iterator[float]:
     while True:
         # normalize sin from interval -1:1 to 0:1
         yield 0.5 + 0.5 * math.sin(utime.ticks_us() / delay)
 
 
-async def alert(count: int = 3):
+async def alert(count: int = 3) -> None:
     short_sleep = loop.sleep(20000)
     long_sleep = loop.sleep(80000)
     current = display.backlight()
     for i in range(count * 2):
         if i % 2 == 0:
             display.backlight(BACKLIGHT_MAX)
-            yield short_sleep
+            await short_sleep
         else:
             display.backlight(BACKLIGHT_NORMAL)
-            yield long_sleep
+            await long_sleep
     display.backlight(current)
 
 
-async def click() -> tuple:
+async def click() -> Pos:
     touch = loop.wait(io.TOUCH)
     while True:
-        ev, *pos = yield touch
+        ev, *pos = await touch  # type: int, Pos
         if ev == io.TOUCH_START:
             break
     while True:
-        ev, *pos = yield touch
+        ev, *pos = await touch
         if ev == io.TOUCH_END:
             break
     return pos
 
 
-async def backlight_slide(val: int, delay: int = 35000, step: int = 20):
+def backlight_slide(
+    val: int, delay: int = 35000, step: int = 20
+) -> Coroutine:  # type: ignore
     sleep = loop.sleep(delay)
     current = display.backlight()
     for i in range(current, val, -step if current > val else step):
@@ -110,8 +118,8 @@ async def backlight_slide(val: int, delay: int = 35000, step: int = 20):
         yield sleep
 
 
-def layout(f):
-    async def inner(*args, **kwargs):
+def layout(f: Callable) -> Callable:
+    async def inner(*args: Any, **kwargs: Any) -> Any:
         await backlight_slide(BACKLIGHT_DIM)
         slide = backlight_slide(BACKLIGHT_NORMAL)
         try:
@@ -128,8 +136,8 @@ def layout(f):
 
 
 def header(
-    title: str, icon: bytes = ICON_DEFAULT, fg: int = FG, bg: int = BG, ifg: int = GREEN
-):
+    title: str, icon: str = ICON_DEFAULT, fg: int = FG, bg: int = BG, ifg: int = GREEN
+) -> None:
     if icon is not None:
         display.icon(14, 15, res.load(icon), ifg, bg)
     display.text(44, 35, title, BOLD, fg, bg)
@@ -150,7 +158,7 @@ def grid(
     cells_x: int = 1,
     cells_y: int = 1,
     spacing: int = 0,
-):
+) -> Area:
     w = (end_x - start_x) // n_x
     h = (end_y - start_y) // n_y
     x = (i % n_x) * w
@@ -161,20 +169,23 @@ def grid(
 class Widget:
     tainted = True
 
-    def taint(self):
+    def taint(self) -> None:
         self.tainted = True
 
-    def render(self):
+    def render(self) -> None:
         pass
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: Pos) -> Any:
         pass
 
-    def __iter__(self):
+    def __iter__(self) -> Coroutine:  # type: ignore
         touch = loop.wait(io.TOUCH)
         result = None
         while result is None:
             self.render()
-            event, *pos = yield touch
+            event, *pos = yield touch  # type: int, Pos
             result = self.touch(event, pos)
         return result
+
+    def __await__(self) -> Generator:
+        return self.__iter__()  # type: ignore

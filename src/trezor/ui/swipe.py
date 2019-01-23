@@ -3,6 +3,9 @@ from micropython import const
 from trezor import io, ui
 from trezor.ui import contains, rotate
 
+if False:
+    from typing import Optional  # noqa: F401
+
 SWIPE_UP = const(0x01)
 SWIPE_DOWN = const(0x02)
 SWIPE_LEFT = const(0x04)
@@ -21,21 +24,27 @@ def degrees(swipe: int) -> int:
         return 0
     elif swipe == SWIPE_LEFT:
         return 90
-    elif swipe == SWIPE_RIGHT:
+    else:  # swipe == SWIPE_RIGHT:
         return 270
 
 
 class Swipe(ui.Widget):
-    def __init__(self, area=None, absolute=False, directions=SWIPE_ALL, treshold=30):
+    def __init__(
+        self,
+        area: ui.Area = None,
+        absolute: bool = False,
+        directions: int = SWIPE_ALL,
+        treshold: int = 30,
+    ):
         self.area = area or (0, 0, ui.WIDTH, ui.HEIGHT)
         self.absolute = absolute
         self.directions = directions
         self.treshold = treshold
-        self.start_pos = None
-        self.light_origin = None
+        self.light_origin = ui.BACKLIGHT_NORMAL
         self.light_target = ui.BACKLIGHT_NONE
+        self.start_pos = None  # type: Optional[ui.Pos]
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: ui.Pos) -> Optional[int]:
 
         if not self.absolute:
             pos = rotate(pos)
@@ -99,3 +108,5 @@ class Swipe(ui.Widget):
             # No swipe, reset the state
             self.start_pos = None
             ui.display.backlight(self.light_origin)
+
+        return None

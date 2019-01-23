@@ -15,6 +15,7 @@ mock = "*"
 isort = "*"
 flake8 = "*"
 black = "*"
+mypy = "*"
 
 # trezor-common cointool
 click = ">=6"

@@ -13,6 +13,10 @@ _REP_CONT_DATA = const(1)  # offset of data in the continuation report
 
 SESSION_ID = const(0)
 
+if False:
+    from typing import Optional  # noqa: F401
+    from trezorio import WireInterface  # noqa: F401
+
 
 class Reader:
     """
@@ -20,17 +24,14 @@ class Reader:
     async-file-like interface.
     """
 
-    def __init__(self, iface):
+    def __init__(self, iface: WireInterface) -> None:
         self.iface = iface
         self.type = None
-        self.size = None
-        self.data = None
+        self.size = 0
         self.ofs = 0
+        self.data = bytes()
 
-    def __repr__(self):
-        return "<ReaderV1: type=%d size=%dB>" % (self.type, self.size)
-
-    async def aopen(self):
+    async def aopen(self) -> None:
         """
         Begin the message transmission by waiting for initial V2 message report
         on this session.  `self.type` and `self.size` are initialized and
@@ -53,7 +54,7 @@ class Reader:
         self.data = report[_REP_INIT_DATA : _REP_INIT_DATA + msize]
         self.ofs = 0
 
-    async def areadinto(self, buf):
+    async def areadinto(self, buf: bytearray) -> int:
         """
         Read exactly `len(buf)` bytes into `buf`, waiting for additional
         reports, if needed.  Raises `EOFError` if end-of-message is encountered
@@ -91,17 +92,14 @@ class Writer:
     async-file-like interface.
     """
 
-    def __init__(self, iface):
+    def __init__(self, iface: WireInterface):
         self.iface = iface
-        self.type = None
-        self.size = None
-        self.data = bytearray(_REP_LEN)
+        self.type = None  # type: Optional[int]
+        self.size = 0
         self.ofs = 0
+        self.data = bytearray(_REP_LEN)
 
-    def __repr__(self):
-        return "<WriterV1: type=%d size=%dB>" % (self.type, self.size)
-
-    def setheader(self, mtype, msize):
+    def setheader(self, mtype: int, msize: int) -> None:
         """
         Reset the writer state and load the message header with passed type and
         total message size.
@@ -113,7 +111,7 @@ class Writer:
         )
         self.ofs = _REP_INIT_DATA
 
-    async def awrite(self, buf):
+    async def awrite(self, buf: bytes) -> int:
         """
         Encode and write every byte from `buf`.  Does not need to be called in
         case message has zero length.  Raises `EOFError` if the length of `buf`
@@ -142,7 +140,7 @@ class Writer:
 
         return nwritten
 
-    async def aclose(self):
+    async def aclose(self) -> None:
         """Flush and close the message transmission."""
         if self.ofs != _REP_CONT_DATA:
             # we didn't write anything or last write() wasn't report-aligned,

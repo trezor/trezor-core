@@ -50,12 +50,12 @@ static const char *get_0str(mp_obj_t o, size_t min_len, size_t max_len) {
 }
 
 /// def __init__(self,
-///              device_class: int=0,
-///              device_subclass: int=0,
-///              device_protocol: int=0,
 ///              vendor_id: int,
 ///              product_id: int,
 ///              release_num: int,
+///              device_class: int=0,
+///              device_subclass: int=0,
+///              device_protocol: int=0,
 ///              manufacturer: str='',
 ///              product: str='',
 ///              serial_number: str='',

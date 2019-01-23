@@ -104,7 +104,7 @@ STATIC mp_obj_t mod_trezorconfig_change_pin(mp_obj_t pin, mp_obj_t newpin) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorconfig_change_pin_obj, mod_trezorconfig_change_pin);
 
-/// def get(app: int, key: int, public: bool=False) -> bytes:
+/// def get(app: int, key: int, public: bool = False) -> bytes:
 ///     '''
 ///     Gets a value of given key for given app (or empty bytes if not set).
 ///     '''
@@ -124,7 +124,7 @@ STATIC mp_obj_t mod_trezorconfig_get(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorconfig_get_obj, 2, 3, mod_trezorconfig_get);
 
-/// def set(app: int, key: int, value: bytes, public: bool=False) -> None:
+/// def set(app: int, key: int, value: bytes, public: bool = False) -> None:
 ///     '''
 ///     Sets a value of given key for given app.
 ///     '''

@@ -2,6 +2,9 @@ from micropython import const
 
 from trezor import ui
 
+if False:
+    from typing import List, Union  # noqa: F401
+
 TEXT_HEADER_HEIGHT = const(48)
 TEXT_LINE_HEIGHT = const(26)
 TEXT_LINE_HEIGHT_HALF = const(13)
@@ -13,7 +16,7 @@ BR = const(-256)
 BR_HALF = const(-257)
 
 
-def render_text(words: list, new_lines: bool, max_lines: int) -> None:
+def render_text(words: List[Union[str, int]], new_lines: bool, max_lines: int) -> None:
     # initial rendering state
     font = ui.NORMAL
     fg = ui.FG
@@ -22,7 +25,7 @@ def render_text(words: list, new_lines: bool, max_lines: int) -> None:
     offset_y = TEXT_HEADER_HEIGHT + TEXT_LINE_HEIGHT
     OFFSET_X_MAX = ui.WIDTH
     OFFSET_Y_MAX = TEXT_HEADER_HEIGHT + TEXT_LINE_HEIGHT * max_lines
-    FONTS = (ui.NORMAL, ui.BOLD, ui.MONO, ui.MONO_BOLD)
+    FONTS = (ui.NORMAL, ui.BOLD, ui.MONO)
 
     # sizes of common glyphs
     SPACE = ui.display.text_width(" ", font)
@@ -116,37 +119,37 @@ class Text(ui.Widget):
         icon_color: int = ui.ORANGE_ICON,
         max_lines: int = TEXT_MAX_LINES,
         new_lines: bool = True,
-    ):
+    ) -> None:
         self.header_text = header_text
         self.header_icon = header_icon
         self.icon_color = icon_color
         self.max_lines = max_lines
         self.new_lines = new_lines
-        self.content = []
+        self.content = []  # type: List[Union[str, int]]
 
-    def normal(self, *content):
+    def normal(self, *content: Union[str, int]) -> None:
         self.content.append(ui.NORMAL)
         self.content.extend(content)
 
-    def bold(self, *content):
+    def bold(self, *content: Union[str, int]) -> None:
         self.content.append(ui.BOLD)
         self.content.extend(content)
 
-    def mono(self, *content):
+    def mono(self, *content: Union[str, int]) -> None:
         self.content.append(ui.MONO)
         self.content.extend(content)
 
-    def mono_bold(self, *content):
+    def mono_bold(self, *content) -> None:
         self.content.append(ui.MONO_BOLD)
         self.content.extend(content)
 
-    def br(self):
+    def br(self) -> None:
         self.content.append(BR)
 
-    def br_half(self):
+    def br_half(self) -> None:
         self.content.append(BR_HALF)
 
-    def render(self):
+    def render(self) -> None:
         if self.tainted:
             ui.header(
                 self.header_text,

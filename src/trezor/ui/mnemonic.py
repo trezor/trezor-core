@@ -6,10 +6,13 @@ from trezor.ui.button import BTN_CLICKED, ICON, Button
 if __debug__:
     from apps.debug import input_signal
 
+if False:
+    from typing import Any, Dict, Iterable, Optional  # noqa: F401
+
 MNEMONIC_KEYS = ("abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yz")
 
 
-def key_buttons(keys):
+def key_buttons(keys: Iterable[str]) -> Iterable[Button]:
     return [Button(ui.grid(i + 3, n_y=4), k) for i, k in enumerate(keys)]
 
 
@@ -24,13 +27,13 @@ def compute_mask(text: str) -> int:
 
 
 class Input(Button):
-    def __init__(self, area: tuple, content: str = "", word: str = ""):
+    def __init__(self, area: ui.Area, content: str = "", word: str = "") -> None:
         super().__init__(area, content)
         self.word = word
-        self.icon = None
+        self.icon = None  # type: Optional[str]
         self.pending = False
 
-    def edit(self, content: str, word: str, pending: bool):
+    def edit(self, content: str, word: str, pending: bool) -> None:
         self.word = word
         self.content = content
         self.pending = pending
@@ -49,7 +52,9 @@ class Input(Button):
             self.disable()
             self.icon = None
 
-    def render_content(self, s, ax, ay, aw, ah):
+    def render_content(
+        self, s: Dict[str, int], ax: int, ay: int, aw: int, ah: int
+    ) -> None:
         text_style = s["text-style"]
         fg_color = s["fg-color"]
         bg_color = s["bg-color"]
@@ -79,24 +84,24 @@ class Input(Button):
 
 
 class MnemonicKeyboard(ui.Widget):
-    def __init__(self, prompt: str = ""):
+    def __init__(self, prompt: str = "") -> None:
         self.prompt = prompt
         self.input = Input(ui.grid(1, n_x=4, n_y=4, cells_x=3), "", "")
         self.back = Button(
             ui.grid(0, n_x=4, n_y=4), res.load(ui.ICON_BACK), style=ui.BTN_CLEAR
         )
         self.keys = key_buttons(MNEMONIC_KEYS)
-        self.pbutton = None  # pending key button
+        self.pbutton = None  # type: Optional[Button]  # pending key button
         self.pindex = 0  # index of current pending char in pbutton
 
-    def taint(self):
+    def taint(self) -> None:
         super().taint()
         self.input.taint()
         self.back.taint()
         for btn in self.keys:
             btn.taint()
 
-    def render(self):
+    def render(self) -> None:
         if self.input.content:
             # content button and backspace
             self.input.render()
@@ -109,14 +114,14 @@ class MnemonicKeyboard(ui.Widget):
         for btn in self.keys:
             btn.render()
 
-    def touch(self, event, pos):
+    def touch(self, event: int, pos: ui.Pos) -> Optional[str]:
         content = self.input.content
         word = self.input.word
 
         if self.back.touch(event, pos) == BTN_CLICKED:
             # backspace, delete the last character of input
             self.edit(content[:-1])
-            return
+            return None
 
         if self.input.touch(event, pos) == BTN_CLICKED:
             # input press, either auto-complete or confirm
@@ -125,7 +130,7 @@ class MnemonicKeyboard(ui.Widget):
                 return content
             else:
                 self.edit(word)
-                return
+                return None
 
         for btn in self.keys:
             if btn.touch(event, pos) == BTN_CLICKED:
@@ -137,9 +142,11 @@ class MnemonicKeyboard(ui.Widget):
                     index = 0
                     content += btn.content[0]
                 self.edit(content, btn, index)
-                return
+                return None
 
-    def edit(self, content, button=None, index=0):
+        return None
+
+    def edit(self, content: str, button: Button = None, index: int = 0) -> None:
         word = bip39.find_word(content) or ""
         mask = bip39.complete_word(content)
 
@@ -154,13 +161,13 @@ class MnemonicKeyboard(ui.Widget):
             else:
                 btn.disable()
 
-    async def __iter__(self):
+    async def __iter__(self) -> str:
         if __debug__:
             return await loop.spawn(self.edit_loop(), input_signal)
         else:
             return await self.edit_loop()
 
-    async def edit_loop(self):
+    async def edit_loop(self) -> str:
         timeout = loop.sleep(1000 * 1000 * 1)
         touch = loop.wait(io.TOUCH)
         wait_timeout = loop.spawn(touch, timeout)
