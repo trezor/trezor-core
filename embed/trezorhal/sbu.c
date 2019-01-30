@@ -105,8 +105,8 @@ void sbu_uart_off(void) {
     HAL_Delay(10);
 }
 
-int sbu_read(uint8_t *data, uint16_t len) {
-    int res = HAL_UART_Receive(&uart_handle, data, len, 10000);
+int sbu_read(uint8_t *data, uint16_t len, uint32_t timeout) {
+    int res = HAL_UART_Receive(&uart_handle, data, len, timeout);
     ensure(sectrue * ((HAL_OK == res) || (HAL_TIMEOUT == res)), NULL);
     if (HAL_OK == res) {
         return len;
@@ -115,8 +115,8 @@ int sbu_read(uint8_t *data, uint16_t len) {
     }
 }
 
-void sbu_write(const uint8_t *data, uint16_t len) {
-    ensure(sectrue * (HAL_OK == HAL_UART_Transmit(&uart_handle, (uint8_t *)data, len, 10000)), NULL);
+void sbu_write(const uint8_t *data, uint16_t len, uint32_t timeout) {
+    ensure(sectrue * (HAL_OK == HAL_UART_Transmit(&uart_handle, (uint8_t *)data, len, timeout)), NULL);
 }
 
 void sbu_set_pins(secbool sbu1, secbool sbu2) {

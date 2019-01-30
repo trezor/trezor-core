@@ -26,8 +26,8 @@
 void sbu_init(void);
 void sbu_uart_on(void);
 void sbu_uart_off(void);
-int sbu_read(uint8_t *data, uint16_t len);
-void sbu_write(const uint8_t *data, uint16_t len);
+int sbu_read(uint8_t *data, uint16_t len, uint32_t timeout);
+void sbu_write(const uint8_t *data, uint16_t len, uint32_t timeout);
 void sbu_set_pins(secbool sbu1, secbool sbu2);
 
 #endif

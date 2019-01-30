@@ -37,29 +37,31 @@ STATIC mp_obj_t mod_trezorio_SBU_make_new(const mp_obj_type_t *type, size_t n_ar
     return MP_OBJ_FROM_PTR(o);
 }
 
-/// def read(buffer: bytearray) -> int:
+/// def read(buffer: bytearray, timeout=10000) -> int:
 ///     '''
 ///     Reads from SBU
 ///     '''
-STATIC mp_obj_t mod_trezorio_SBU_read(mp_obj_t self, mp_obj_t buffer) {
+STATIC mp_obj_t mod_trezorio_SBU_read(size_t n_args, const mp_obj_t *args) {
     mp_buffer_info_t b;
-    mp_get_buffer_raise(buffer, &b, MP_BUFFER_WRITE);
-    int res = sbu_read(b.buf, b.len);
+    mp_get_buffer_raise(args[1], &b, MP_BUFFER_WRITE);
+    uint32_t timeout = n_args > 2 ? mp_obj_get_int(args[2]) : 10000;
+    int res = sbu_read(b.buf, b.len, timeout);
     return MP_OBJ_NEW_SMALL_INT(res);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_SBU_read_obj, mod_trezorio_SBU_read);
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorio_SBU_read_obj, 2, 3, mod_trezorio_SBU_read);
 
-/// def write(buffer: bytearray) -> None:
+/// def write(buffer: bytearray, timeout=10000) -> None:
 ///     '''
-///     Wwrites from SBU
+///     Writes to SBU
 ///     '''
-STATIC mp_obj_t mod_trezorio_SBU_write(mp_obj_t self, mp_obj_t buffer) {
+STATIC mp_obj_t mod_trezorio_SBU_write(size_t n_args, const mp_obj_t *args) {
     mp_buffer_info_t b;
-    mp_get_buffer_raise(buffer, &b, MP_BUFFER_READ);
-    sbu_write(b.buf, b.len);
+    mp_get_buffer_raise(args[1], &b, MP_BUFFER_READ);
+    uint32_t timeout = n_args > 2 ? mp_obj_get_int(args[2]) : 10000;
+    sbu_write(b.buf, b.len, timeout);
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_SBU_write_obj, mod_trezorio_SBU_write);
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorio_SBU_write_obj, 2, 3, mod_trezorio_SBU_write);
 
 /// def set_uart(self, serial: bool) -> None:
 ///     '''
