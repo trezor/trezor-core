@@ -6,7 +6,15 @@ from trezorui import Display
 from trezor import io, loop, res, utils, workflow
 
 if False:
-    from typing import Any, Callable, Generator, Iterator, Optional, Tuple  # noqa: F401
+    from typing import (  # noqa: F401
+        Any,
+        Callable,
+        Generator,
+        Iterator,
+        Optional,
+        TypeVar,
+        Tuple,
+    )
 
     Pos = Tuple[int, int]
     Area = Tuple[int, int, int, int]
@@ -118,7 +126,11 @@ def backlight_slide(
         yield sleep
 
 
-def layout(f: Callable) -> Callable:
+if False:
+    Layout = TypeVar("Layout", bound=Callable)
+
+
+def layout(f: Layout) -> Layout:
     async def inner(*args: Any, **kwargs: Any) -> Any:
         await backlight_slide(BACKLIGHT_DIM)
         slide = backlight_slide(BACKLIGHT_NORMAL)
@@ -132,7 +144,7 @@ def layout(f: Callable) -> Callable:
             loop.close(slide)
             workflow.onlayoutclose(layout)
 
-    return inner
+    return inner  # type: ignore
 
 
 def header(

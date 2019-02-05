@@ -173,7 +173,7 @@ def next_u2f_counter() -> int:
     return i
 
 
-def set_u2f_counter(cntr: int) -> None:
+def set_u2f_counter(cntr: int = None) -> None:
     if cntr:
         config.set(_APP, _U2F_COUNTER, cntr.to_bytes(4, "big"))
     else:

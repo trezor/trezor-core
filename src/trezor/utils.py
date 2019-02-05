@@ -13,7 +13,7 @@ from trezorutils import (  # noqa: F401
 )
 
 if False:
-    from typing import Iterable, Iterator, TypeVar, List
+    from typing import Iterable, Iterator, TypeVar, Sequence
 
 
 def unimport_begin() -> Iterable[str]:
@@ -50,12 +50,12 @@ def ensure(cond: bool, msg: str = None) -> None:
 
 
 if False:
-    Chunked = TypeVar("Chunked")
+    Chunked = TypeVar("Chunked", bound=Sequence)
 
 
-def chunks(items: List[Chunked], size: int) -> Iterator[List[Chunked]]:
+def chunks(items: Chunked, size: int) -> Iterator[Chunked]:
     for i in range(0, len(items), size):
-        yield items[i : i + size]
+        yield items[i : i + size]  # type: ignore
 
 
 def format_amount(amount: int, decimals: int) -> str:

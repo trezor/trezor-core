@@ -1,28 +1,31 @@
 from apps.common.coininfo import COINS
 
+if False:
+    from apps.common.coininfo import CoinInfo
 
-def by_shortcut(shortcut):
+
+def by_shortcut(shortcut: str) -> CoinInfo:
     for c in COINS:
         if c.coin_shortcut == shortcut:
             return c
     raise ValueError('Unknown coin shortcut "%s"' % shortcut)
 
 
-def by_name(name):
+def by_name(name: str) -> CoinInfo:
     for c in COINS:
         if c.coin_name == name:
             return c
     raise ValueError('Unknown coin name "%s"' % name)
 
 
-def by_address_type(address_type):
+def by_address_type(address_type: int) -> CoinInfo:
     for c in COINS:
         if c.address_type == address_type:
             return c
     raise ValueError("Unknown coin address type %d" % address_type)
 
 
-def by_slip44(slip44):
+def by_slip44(slip44: int) -> CoinInfo:
     for c in COINS:
         if c.slip44 == slip44:
             return c

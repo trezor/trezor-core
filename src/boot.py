@@ -4,7 +4,7 @@ from trezor.pin import pin_to_int, show_pin_timeout
 from apps.common.request_pin import request_pin
 
 
-async def bootscreen():
+async def bootscreen() -> None:
     while True:
         try:
             if not config.has_pin():
@@ -23,7 +23,7 @@ async def bootscreen():
                 log.exception(__name__, e)
 
 
-async def lockscreen():
+async def lockscreen() -> None:
     from apps.common import storage
 
     label = storage.get_label()
