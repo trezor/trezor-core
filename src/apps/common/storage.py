@@ -141,11 +141,11 @@ def get_flags() -> int:
 def set_flags(flags: int) -> None:
     b = config.get(_APP, _FLAGS)
     if b is None:
-        b = 0
+        i = 0
     else:
-        b = int.from_bytes(b, "big")
-    flags = (flags | b) & 0xFFFFFFFF
-    if flags != b:
+        i = int.from_bytes(b, "big")
+    flags = (flags | i) & 0xFFFFFFFF
+    if flags != i:
         config.set(_APP, _FLAGS, flags.to_bytes(4, "big"))
 
 
@@ -166,20 +166,20 @@ def set_autolock_delay_ms(delay_ms: int) -> None:
 def next_u2f_counter() -> int:
     b = config.get(_APP, _U2F_COUNTER)
     if not b:
-        b = 0
+        i = 0
     else:
-        b = int.from_bytes(b, "big") + 1
-    set_u2f_counter(b)
-    return b
+        i = int.from_bytes(b, "big") + 1
+    set_u2f_counter(i)
+    return i
 
 
-def set_u2f_counter(cntr: int):
+def set_u2f_counter(cntr: int) -> None:
     if cntr:
         config.set(_APP, _U2F_COUNTER, cntr.to_bytes(4, "big"))
     else:
         config.set(_APP, _U2F_COUNTER, b"")
 
 
-def wipe():
+def wipe() -> None:
     config.wipe()
     cache.clear()

@@ -123,7 +123,7 @@ STATIC void wrapped_ui_wait_callback(uint32_t current, uint32_t total) {
     }
 }
 
-/// def seed(mnemonic: str, passphrase: str, callback: (int, int -> None)=None) -> bytes:
+/// def seed(mnemonic: str, passphrase: str, callback: Callable[[int, int], None]=None) -> bytes:
 ///     '''
 ///     Generate seed from mnemonic and passphrase.
 ///     '''

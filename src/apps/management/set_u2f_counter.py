@@ -6,8 +6,11 @@ from trezor.ui.text import Text
 from apps.common import storage
 from apps.common.confirm import require_confirm
 
+if False:
+    from trezor.messages.SetU2FCounter import SetU2FCounter
 
-async def set_u2f_counter(ctx, msg):
+
+async def set_u2f_counter(ctx: wire.Context, msg: SetU2FCounter) -> Success:
     if msg.u2f_counter is None:
         raise wire.ProcessError("No value provided")
 

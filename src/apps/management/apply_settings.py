@@ -6,8 +6,11 @@ from trezor.ui.text import Text
 from apps.common import storage
 from apps.common.confirm import require_confirm
 
+if False:
+    from trezor.messages.ApplySettings import ApplySettings
 
-async def apply_settings(ctx, msg):
+
+async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
     if (
         msg.homescreen is None
         and msg.label is None
@@ -40,20 +43,20 @@ async def apply_settings(ctx, msg):
     return Success(message="Settings applied")
 
 
-async def require_confirm_change_homescreen(ctx):
+async def require_confirm_change_homescreen(ctx: wire.Context) -> None:
     text = Text("Change homescreen", ui.ICON_CONFIG)
     text.normal("Do you really want to", "change homescreen?")
     await require_confirm(ctx, text, code=ButtonRequestType.ProtectCall)
 
 
-async def require_confirm_change_label(ctx, label):
+async def require_confirm_change_label(ctx: wire.Context, label: str) -> None:
     text = Text("Change label", ui.ICON_CONFIG)
     text.normal("Do you really want to", "change label to")
     text.bold("%s?" % label)
     await require_confirm(ctx, text, code=ButtonRequestType.ProtectCall)
 
 
-async def require_confirm_change_passphrase(ctx, use):
+async def require_confirm_change_passphrase(ctx: wire.Context, use: bool) -> None:
     text = Text("Enable passphrase" if use else "Disable passphrase", ui.ICON_CONFIG)
     text.normal("Do you really want to")
     text.normal("enable passphrase" if use else "disable passphrase")
@@ -61,7 +64,9 @@ async def require_confirm_change_passphrase(ctx, use):
     await require_confirm(ctx, text, code=ButtonRequestType.ProtectCall)
 
 
-async def require_confirm_change_passphrase_source(ctx, source):
+async def require_confirm_change_passphrase_source(
+    ctx: wire.Context, source: int
+) -> None:
     if source == PassphraseSourceType.DEVICE:
         desc = "ON DEVICE"
     elif source == PassphraseSourceType.HOST:

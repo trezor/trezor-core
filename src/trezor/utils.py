@@ -77,16 +77,16 @@ class HashWriter:
         self.ctx = ctx
         self.buf = bytearray(1)  # used in append()
 
-    def extend(self, buf: bytearray):
+    def extend(self, buf: bytearray) -> None:
         self.ctx.update(buf)
 
-    def write(self, buf: bytearray):  # alias for extend()
+    def write(self, buf: bytearray) -> None:  # alias for extend()
         self.ctx.update(buf)
 
-    async def awrite(self, buf: bytearray):  # AsyncWriter interface
-        return self.ctx.update(buf)
+    async def awrite(self, buf: bytearray) -> None:  # AsyncWriter interface
+        self.ctx.update(buf)
 
-    def append(self, b: int):
+    def append(self, b: int) -> None:
         self.buf[0] = b
         self.ctx.update(self.buf)
 
@@ -94,7 +94,7 @@ class HashWriter:
         return self.ctx.digest()
 
 
-def obj_eq(l, r):
+def obj_eq(l: object, r: object) -> bool:
     """
     Compares object contents, supports __slots__.
     """
@@ -106,7 +106,7 @@ def obj_eq(l, r):
         return l.__dict__ == r.__dict__
 
 
-def obj_repr(o):
+def obj_repr(o: object) -> str:
     """
     Returns a string representation of object, supports __slots__.
     """
@@ -117,7 +117,7 @@ def obj_repr(o):
     return "<%s: %s>" % (o.__class__.__name__, d)
 
 
-def obj_slots_dict(o):
+def obj_slots_dict(o: object) -> dict:
     """
     Builds dict for o from defined __slots__.
     """

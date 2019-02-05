@@ -18,8 +18,11 @@ from apps.common import storage
 from apps.common.confirm import require_confirm
 from apps.management.change_pin import request_pin_confirm
 
+if False:
+    from trezor.messages.RecoveryDevice import RecoveryDevice
 
-async def recovery_device(ctx, msg):
+
+async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     """
     Recover BIP39 seed into empty device.
 
@@ -74,7 +77,7 @@ async def recovery_device(ctx, msg):
 
 
 @ui.layout
-async def request_wordcount(ctx):
+async def request_wordcount(ctx: wire.Context) -> int:
     await ctx.call(ButtonRequest(code=MnemonicWordCount), ButtonAck)
 
     text = Text("Device recovery", ui.ICON_RECOVERY)
@@ -85,7 +88,7 @@ async def request_wordcount(ctx):
 
 
 @ui.layout
-async def request_mnemonic(ctx, count: int) -> str:
+async def request_mnemonic(ctx: wire.Context, count: int) -> str:
     await ctx.call(ButtonRequest(code=MnemonicInput), ButtonAck)
 
     words = []

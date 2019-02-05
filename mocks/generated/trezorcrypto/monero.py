@@ -5,7 +5,7 @@ class Ge25519:
     '''
     EC point on ED25519
     '''
-    def __init__(x: Optional[Union[Ge25519, bytes]] = None):
+    def __init__(self, x: Optional[Union[Ge25519, bytes]] = None) -> None:
         '''
         Constructor
         '''
@@ -15,7 +15,7 @@ class Sc25519:
     '''
     EC scalar on SC25519
     '''
-    def __init__(x: Optional[Union[Sc25519, bytes, int]] = None):
+    def __init__(self, x: Optional[Union[Sc25519, bytes, int]] = None) -> None:
         '''
         Constructor
         '''
@@ -25,19 +25,19 @@ class Hasher:
     '''
     XMR hasher
     '''
-    def __init__(x: Optional[bytes] = None):
+    def __init__(self, x: Optional[bytes] = None) -> None:
         '''
         Constructor
         '''
-   def update(buffer: bytes):
+    def update(self, buffer: bytes) -> None:
         '''
         Update hasher
         '''
-   def digest() -> bytes:
+    def digest(self) -> bytes:
         '''
         Computes digest
         '''
-   def copy() -> Hasher:
+    def copy(self) -> Hasher:
         '''
         Creates copy of the hasher, preserving the state
         '''
@@ -49,7 +49,7 @@ def init256_modm(dst: Optional[Sc25519], val: Union[int, bytes, Sc25519]) -> Sc2
     '''
 
 # extmod/modtrezorcrypto/modtrezorcrypto-monero.h
-def check256_modm(val: Sc25519):
+def check256_modm(val: Sc25519) -> None:
     '''
     Throws exception if scalar is invalid
     '''
@@ -139,7 +139,7 @@ def ge25519_set_xmr_h(r: Optional[Ge25519]) -> Ge25519:
     '''
 
 # extmod/modtrezorcrypto/modtrezorcrypto-monero.h
-def ge25519_check(r: Ge25519):
+def ge25519_check(r: Ge25519) -> None:
     '''
     Checks point, throws if not on curve
     '''

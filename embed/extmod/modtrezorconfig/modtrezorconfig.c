@@ -35,7 +35,7 @@ STATIC void wrapped_ui_wait_callback(uint32_t wait, uint32_t progress) {
     }
 }
 
-/// def init(ui_wait_callback: (int, int -> None)=None) -> None:
+/// def init(ui_wait_callback: Callable[[int, int], None]=None) -> None:
 ///     '''
 ///     Initializes the storage.  Must be called before any other method is
 ///     called from this module!

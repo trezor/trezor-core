@@ -7,8 +7,11 @@ from trezor.ui.text import Text
 from apps.common import storage
 from apps.common.confirm import require_confirm
 
+if False:
+    from trezor.messages.LoadDevice import LoadDevice
 
-async def load_device(ctx, msg):
+
+async def load_device(ctx: wire.Context, msg: LoadDevice) -> Success:
 
     if storage.is_initialized():
         raise wire.UnexpectedMessage("Already initialized")

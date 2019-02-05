@@ -26,7 +26,7 @@ class Reader:
 
     def __init__(self, iface: WireInterface) -> None:
         self.iface = iface
-        self.type = None
+        self.type = None  # type: Optional[int]
         self.size = 0
         self.ofs = 0
         self.data = bytes()

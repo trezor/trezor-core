@@ -6,13 +6,21 @@ from trezor.wire.errors import *
 from apps.common import seed
 
 if False:
-    from typing import Any, Awaitable, Callable, Dict, Iterable, Tuple  # noqa: F401
+    from typing import (
+        Any,
+        Awaitable,
+        Callable,
+        Dict,
+        Iterable,
+        List,
+        Tuple,
+    )  # noqa: F401
     from trezorio import WireInterface  # noqa: F401
 
 workflow_handlers = {}  # type: Dict[int, Tuple[Callable, Iterable]]
 
 
-def add(mtype: int, pkgname: str, modname: str, namespace: List) -> None:
+def add(mtype: int, pkgname: str, modname: str, namespace: List = None) -> None:
     """Shortcut for registering a dynamically-imported Protobuf workflow."""
     if namespace is not None:
         register(
@@ -189,7 +197,13 @@ async def protobuf_workflow(
         await ctx.write(res)
 
 
-async def keychain_workflow(ctx, req, namespace, handler, *args):
+async def keychain_workflow(
+    ctx: Context,
+    req: protobuf.MessageType,
+    namespace: List,
+    handler: Callable[[Context, protobuf.MessageType, Any], Awaitable],
+    *args: Any
+) -> Any:
     keychain = await seed.get_keychain(ctx, namespace)
     args += (keychain,)
     try:
@@ -198,14 +212,16 @@ async def keychain_workflow(ctx, req, namespace, handler, *args):
         keychain.__del__()
 
 
-def import_workflow(ctx, req, pkgname, modname, *args):
+def import_workflow(
+    ctx: Context, req: protobuf.MessageType, pkgname: str, modname: str, *args: Any
+) -> Any:
     modpath = "%s.%s" % (pkgname, modname)
     module = __import__(modpath, None, None, (modname,), 0)
     handler = getattr(module, modname)
     return handler(ctx, req, *args)
 
 
-async def unexpected_msg(ctx, reader):
+async def unexpected_msg(ctx: Context, reader: codec_v1.Reader) -> None:
     from trezor.messages.Failure import Failure
 
     # receive the message and throw it away

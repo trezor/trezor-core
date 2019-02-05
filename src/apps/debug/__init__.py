@@ -4,22 +4,29 @@ if not __debug__:
     halt("debug mode inactive")
 
 if __debug__:
-    from trezor import loop, utils
+    from trezor import loop, utils, wire
     from trezor.messages import MessageType
     from trezor.messages.DebugLinkState import DebugLinkState
     from trezor.ui import confirm, swipe
     from trezor.wire import register, protobuf_workflow
     from apps.common import storage
 
-    reset_internal_entropy = None
-    reset_current_words = None
-    reset_word_index = None
+    if False:
+        from typing import List, Optional
+        from trezor.messages.DebugLinkDecision import DebugLinkDecision
+        from trezor.messages.DebugLinkGetState import DebugLinkGetState
+
+    reset_internal_entropy = None  # type: Optional[bytes]
+    reset_current_words = None  # type: Optional[List[str]]
+    reset_word_index = None  # type: Optional[int]
 
     confirm_signal = loop.signal()
     swipe_signal = loop.signal()
     input_signal = loop.signal()
 
-    async def dispatch_DebugLinkDecision(ctx, msg):
+    async def dispatch_DebugLinkDecision(
+        ctx: wire.Context, msg: DebugLinkDecision
+    ) -> None:
         if msg.yes_no is not None:
             confirm_signal.send(confirm.CONFIRMED if msg.yes_no else confirm.CANCELLED)
         if msg.up_down is not None:
@@ -27,7 +34,9 @@ if __debug__:
         if msg.input is not None:
             input_signal.send(msg.input)
 
-    async def dispatch_DebugLinkGetState(ctx, msg):
+    async def dispatch_DebugLinkGetState(
+        ctx: wire.Context, msg: DebugLinkGetState
+    ) -> DebugLinkState:
         m = DebugLinkState()
         m.mnemonic = storage.get_mnemonic()
         m.passphrase_protection = storage.has_passphrase()
@@ -37,7 +46,7 @@ if __debug__:
             m.reset_word = " ".join(reset_current_words)
         return m
 
-    def boot():
+    def boot() -> None:
         # wipe storage when debug build is used on real hardware
         if not utils.EMULATOR:
             storage.wipe()

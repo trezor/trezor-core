@@ -182,7 +182,7 @@ STATIC void mp_unpack_scalar(bignum256modm r, const mp_obj_t arg, mp_int_t offse
 ///     EC point on ED25519
 ///     '''
 ///
-///     def __init__(x: Optional[Union[Ge25519, bytes]] = None):
+///     def __init__(self, x: Optional[Union[Ge25519, bytes]] = None) -> None:
 ///         '''
 ///         Constructor
 ///         '''
@@ -218,7 +218,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_monero_ge25519___del___obj, mo
 ///     EC scalar on SC25519
 ///     '''
 ///
-///     def __init__(x: Optional[Union[Sc25519, bytes, int]] = None):
+///     def __init__(self, x: Optional[Union[Sc25519, bytes, int]] = None) -> None:
 ///         '''
 ///         Constructor
 ///         '''
@@ -258,22 +258,22 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_monero_bignum256modm___del___o
 ///     XMR hasher
 ///     '''
 ///
-///     def __init__(x: Optional[bytes] = None):
+///     def __init__(self, x: Optional[bytes] = None) -> None:
 ///         '''
 ///         Constructor
 ///         '''
 ///
-///    def update(buffer: bytes):
+///     def update(self, buffer: bytes) -> None:
 ///         '''
 ///         Update hasher
 ///         '''
 ///
-///    def digest() -> bytes:
+///     def digest(self) -> bytes:
 ///         '''
 ///         Computes digest
 ///         '''
 ///
-///    def copy() -> Hasher:
+///     def copy(self) -> Hasher:
 ///         '''
 ///         Creates copy of the hasher, preserving the state
 ///         '''
@@ -333,7 +333,7 @@ STATIC mp_obj_t mod_trezorcrypto_monero_init256_modm(size_t n_args, const mp_obj
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorcrypto_monero_init256_modm_obj, 0, 2, mod_trezorcrypto_monero_init256_modm);
 
-/// def check256_modm(val: Sc25519):
+/// def check256_modm(val: Sc25519) -> None:
 ///     '''
 ///     Throws exception if scalar is invalid
 ///     '''
@@ -575,7 +575,7 @@ STATIC mp_obj_t mod_trezorcrypto_monero_ge25519_set_xmr_h(size_t n_args, const m
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorcrypto_monero_ge25519_set_xmr_h_obj, 0, 1, mod_trezorcrypto_monero_ge25519_set_xmr_h);
 
-/// def ge25519_check(r: Ge25519):
+/// def ge25519_check(r: Ge25519) -> None:
 ///     '''
 ///     Checks point, throws if not on curve
 ///     '''

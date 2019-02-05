@@ -9,8 +9,11 @@ from apps.management.reset_device import (
     show_wrong_entry,
 )
 
+if False:
+    from trezor.messages.BackupDevice import BackupDevice
 
-async def backup_device(ctx, msg):
+
+async def backup_device(ctx: wire.Context, msg: BackupDevice) -> Success:
     if not storage.is_initialized():
         raise wire.ProcessError("Device is not initialized")
     if not storage.needs_backup():

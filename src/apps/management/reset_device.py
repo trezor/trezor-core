@@ -21,8 +21,11 @@ from apps.management.change_pin import request_pin_confirm
 if __debug__:
     from apps import debug
 
+if False:
+    from trezor.messages.ResetDevice import ResetDevice
 
-async def reset_device(ctx, msg):
+
+async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     # validate parameters and device state
     if msg.strength not in (128, 192, 256):
         raise wire.ProcessError("Invalid strength (has to be 128, 192 or 256 bits)")
@@ -51,7 +54,7 @@ async def reset_device(ctx, msg):
         newpin = ""
 
     # generate and display internal entropy
-    internal_ent = random.bytes(32)
+    internal_ent = random.bytes(32)  # type: bytes
     if __debug__:
         debug.reset_internal_entropy = internal_ent
     if msg.display_random:
@@ -92,7 +95,7 @@ async def reset_device(ctx, msg):
     return Success(message="Initialized")
 
 
-def generate_mnemonic(strength: int, int_entropy: bytes, ext_entropy: bytes) -> bytes:
+def generate_mnemonic(strength: int, int_entropy: bytes, ext_entropy: bytes) -> str:
     ehash = hashlib.sha256()
     ehash.update(int_entropy)
     ehash.update(ext_entropy)
@@ -101,7 +104,7 @@ def generate_mnemonic(strength: int, int_entropy: bytes, ext_entropy: bytes) -> 
     return mnemonic
 
 
-async def show_warning(ctx):
+async def show_warning(ctx: wire.Context) -> None:
     text = Text("Backup your seed", ui.ICON_NOCOPY)
     text.normal(
         "Never make a digital",
@@ -114,7 +117,7 @@ async def show_warning(ctx):
     )
 
 
-async def show_wrong_entry(ctx):
+async def show_wrong_entry(ctx: wire.Context) -> None:
     text = Text("Wrong entry!", ui.ICON_WRONG, icon_color=ui.RED)
     text.normal("You have entered", "wrong seed word.", "Please check again.")
     await require_confirm(
@@ -122,7 +125,7 @@ async def show_wrong_entry(ctx):
     )
 
 
-async def show_success(ctx):
+async def show_success(ctx: wire.Context) -> None:
     text = Text("Backup is done!", ui.ICON_CONFIRM, icon_color=ui.GREEN)
     text.normal(
         "Never make a digital",
@@ -135,7 +138,7 @@ async def show_success(ctx):
     )
 
 
-async def show_entropy(ctx, entropy: bytes):
+async def show_entropy(ctx: wire.Context, entropy: bytes) -> None:
     entropy_str = hexlify(entropy).decode()
     lines = chunks(entropy_str, 16)
     text = Text("Internal entropy", ui.ICON_RESET)
@@ -143,7 +146,7 @@ async def show_entropy(ctx, entropy: bytes):
     await require_confirm(ctx, text, ButtonRequestType.ResetDevice)
 
 
-async def show_mnemonic(ctx, mnemonic: str):
+async def show_mnemonic(ctx: wire.Context, mnemonic: str) -> None:
     await ctx.call(
         ButtonRequest(code=ButtonRequestType.ResetDevice), MessageType.ButtonAck
     )
@@ -156,7 +159,7 @@ async def show_mnemonic(ctx, mnemonic: str):
 
 
 @ui.layout
-async def show_mnemonic_page(page: int, page_count: int, pages: list):
+async def show_mnemonic_page(page: int, page_count: int, pages: list) -> None:
     if __debug__:
         debug.reset_current_words = [word for _, word in pages[page]]
 
@@ -172,7 +175,7 @@ async def show_mnemonic_page(page: int, page_count: int, pages: list):
         await animate_swipe()
 
 
-async def check_mnemonic(ctx, mnemonic: str) -> bool:
+async def check_mnemonic(ctx: wire.Context, mnemonic: str) -> bool:
     words = mnemonic.split()
 
     # check a word from the first half
@@ -189,7 +192,7 @@ async def check_mnemonic(ctx, mnemonic: str) -> bool:
 
 
 @ui.layout
-async def check_word(ctx, words: list, index: int):
+async def check_word(ctx: wire.Context, words: list, index: int) -> bool:
     if __debug__:
         debug.reset_word_index = index
 
