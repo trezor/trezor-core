@@ -27,6 +27,7 @@ def get_features():
     f.unfinished_backup = storage.unfinished_backup()
     f.no_backup = storage.no_backup()
     f.flags = storage.get_flags()
+    f.slip39_in_progress = storage.is_slip39_in_progress()
     return f
 
 

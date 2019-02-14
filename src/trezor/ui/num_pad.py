@@ -40,7 +40,7 @@ class NumPad(ui.Widget):
                     self.page -= 1
                     self._generate_buttons()
                 else:
-                    return btn.content
+                    return int(btn.content)
 
     def _generate_buttons(self):
         display.clear()  # we need to clear old buttons

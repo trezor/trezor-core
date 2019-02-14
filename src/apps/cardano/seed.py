@@ -37,7 +37,8 @@ async def get_keychain(ctx: wire.Context) -> Keychain:
     if passphrase is None:
         passphrase = await protect_by_passphrase(ctx)
         cache.set_passphrase(passphrase)
-    root = bip32.from_mnemonic_cardano(mnemonic.restore(), passphrase)
+    # TODO fix for SLIP-39!
+    root = bip32.from_mnemonic_cardano(mnemonic.bip39.restore(), passphrase)
 
     # derive the namespaced root node
     for i in SEED_NAMESPACE:

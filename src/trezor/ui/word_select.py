@@ -10,40 +10,35 @@ if __debug__:
 
 _W12 = const(12)
 _W18 = const(18)
+_W20 = const(20)
 _W24 = const(24)
+_W33 = const(33)
 
 
 class WordSelector(Widget):
     def __init__(self, content):
         self.content = content
-        self.w12 = Button(
-            ui.grid(6, n_y=4, n_x=3, cells_y=2), str(_W12), style=ui.BTN_KEY
-        )
-        self.w18 = Button(
-            ui.grid(7, n_y=4, n_x=3, cells_y=2), str(_W18), style=ui.BTN_KEY
-        )
-        self.w24 = Button(
-            ui.grid(8, n_y=4, n_x=3, cells_y=2), str(_W24), style=ui.BTN_KEY
-        )
+        self.buttons = {
+            _W12: Button(ui.grid(6, n_y=4), str(_W12), style=ui.BTN_KEY),
+            _W18: Button(ui.grid(7, n_y=4), str(_W18), style=ui.BTN_KEY),
+            _W20: Button(ui.grid(8, n_y=4), str(_W20), style=ui.BTN_KEY),
+            _W24: Button(ui.grid(9, n_y=4), str(_W24), style=ui.BTN_KEY),
+            _W33: Button(ui.grid(10, n_y=4), str(_W33), style=ui.BTN_KEY),
+        }
 
     def taint(self):
         super().taint()
-        self.w12.taint()
-        self.w18.taint()
-        self.w24.taint()
+        for b in self.buttons.values():
+            b.taint()
 
     def render(self):
-        self.w12.render()
-        self.w18.render()
-        self.w24.render()
+        for b in self.buttons.values():
+            b.render()
 
     def touch(self, event, pos):
-        if self.w12.touch(event, pos) == BTN_CLICKED:
-            return _W12
-        if self.w18.touch(event, pos) == BTN_CLICKED:
-            return _W18
-        if self.w24.touch(event, pos) == BTN_CLICKED:
-            return _W24
+        for key, button in self.buttons.items():
+            if button.touch(event, pos) == BTN_CLICKED:
+                return key
 
     async def __iter__(self):
         if __debug__:
