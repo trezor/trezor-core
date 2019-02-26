@@ -117,7 +117,7 @@ def qstrings(w):
     w.build(
         "$builddir/genhdr/qstrdefs.preprocessed.h",
         "qstr_preprocess",
-        "vendor/micropython/py/qstrdefs.h $builddir/genhdr/qstrdefs.collected.h",
+        ["vendor/micropython/py/qstrdefs.h", "$builddir/genhdr/qstrdefs.collected.h"],
     )
     w.build(
         "$builddir/genhdr/qstrdefs.generated.h",
