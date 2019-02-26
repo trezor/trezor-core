@@ -9,7 +9,8 @@ MEMORY {
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 192K
 }
 
-main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
+main_stack_base = ORIGIN(CCMRAM) + LENGTH(CCMRAM); /* 8-byte aligned full descending stack */
+_stack = ORIGIN(CCMRAM);
 _estack = main_stack_base;
 
 /* used by the startup code to populate variables used by the C code */
@@ -31,7 +32,7 @@ _codelen = LENGTH(FLASH) - SIZEOF(.vendorheader) - SIZEOF(.header) + SIZEOF(.fla
 _flash_start = ORIGIN(FLASH);
 _flash_end = ORIGIN(FLASH) + LENGTH(FLASH);
 _heap_start = ADDR(.heap);
-_heap_end = ADDR(.heap) + SIZEOF(.heap);
+_heap_end = ORIGIN(SRAM) + LENGTH(SRAM);
 
 SECTIONS {
   .vendorheader : ALIGN(4) {
@@ -70,10 +71,9 @@ SECTIONS {
 
   .heap : ALIGN(4) {
     . = 37K; /* this acts as a build time assertion that at least this much memory is available for heap use */
-    . = ABSOLUTE(sram_end - 16K); /* this explicitly sets the end of the heap effectively giving the stack at most 16K */
   } >SRAM
 
   .stack : ALIGN(8) {
     . = 4K; /* this acts as a build time assertion that at least this much memory is available for stack use */
-  } >SRAM
+  } >CCMRAM
 }

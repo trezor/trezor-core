@@ -73,11 +73,14 @@ int main(void)
     display_clear();
 #endif
 
+    // TODO: should be in the same place as symbols currently declared in gccollect.h
+    extern uint32_t _stack;
+
     printf("CORE: Preparing stack\n");
     // Stack limit should be less than real stack size, so we have a chance
     // to recover from limit hit.
     mp_stack_set_top(&_estack);
-    mp_stack_set_limit((char*)&_estack - (char*)&_heap_end - 1024);
+    mp_stack_set_limit((char*)&_estack - (char*)&_stack - 1024);
 
     // GC init
     printf("CORE: Starting GC\n");
