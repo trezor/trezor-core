@@ -6,7 +6,8 @@ from trezor.wire.errors import *
 
 from apps.common import seed
 
-_workflow_handlers = {}
+workflow_handlers = {}
+workflow_namespaces = {}
 
 
 def add(mtype, pkgname, modname, namespace=None):
@@ -21,14 +22,14 @@ def register(mtype, handler, *args):
     """Register `handler` to get scheduled after `mtype` message is received."""
     if isinstance(mtype, type) and issubclass(mtype, protobuf.MessageType):
         mtype = mtype.MESSAGE_WIRE_TYPE
-    if mtype in _workflow_handlers:
+    if mtype in workflow_handlers:
         raise KeyError
-    _workflow_handlers[mtype] = (handler, args)
+    workflow_handlers[mtype] = (handler, args)
 
 
 def setup(iface):
     """Initialize the wire stack on passed USB interface."""
-    loop.schedule(session_handler(iface, codec_v1.SESSION_ID))
+    loop.schedule(handle_session(iface, codec_v1.SESSION_ID))
 
 
 class Context:
@@ -99,62 +100,53 @@ class Context:
 
 class UnexpectedMessageError(Exception):
     def __init__(self, msg):
-        super().__init__()
         self.msg = msg
 
 
-async def session_handler(iface, sid):
-    msg = None
+async def handle_session(iface, sid):
     ctx = Context(iface, sid)
     while True:
         try:
-            # wait for new message, if needed, and find handler for it
-            if msg is None:
-                msg = await ctx.read()
-
-            # if the message type is unknown, respond with an unknown message error
-            if msg.type not in _workflow_handlers:
-                code = FailureType.UnexpectedMessage
-                response = Failure(code=code, message="Unexpected message")
-                await ctx.write(response)
-                continue
-
-            # create the workflow handler, parse the message as protobuf
-            handler, args = _workflow_handlers[msg.type]
-            modules = utils.unimport_begin()
-            request = protobuf.load_message(msg, messages.get_type(msg.type))
-            workflow_handler = handler(ctx, request, *args)
+            mods = utils.unimport_begin()
             try:
-                workflow.onstart(workflow_handler)
-                try:
-                    response = await workflow_handler
-
-                except Error as exc:
-                    if __debug__:
-                        log.warning(__name__, exc)
-                    # respond with specific error code and message
-                    response = Failure(code=exc.code, message=exc.message)
-
-                except Exception:
-                    if __debug__:
-                        log.exception(__name__, exc)
-                    # respond with a generic error
-                    code = FailureType.FirmwareError
-                    response = Failure(code=code, message="Firmware error")
-
-                # send the response returned by the workflow
-                if response is not None:
-                    await ctx.write(response)
-            finally:
-                workflow.onclose(workflow_handler)
-                utils.unimport_end(modules)
-
+                req = await ctx.read(workflow_handlers)
+            except UnexpectedMessage:
+                res = unexpected_message()
+            else:
+                res = await handle_request(ctx, req)
+            if res is not None:
+                await ctx.write(res)
+            req = None
+            res = None
+            utils.unimport_end(mods)
         except Exception as exc:
             if __debug__:
                 log.exception(__name__, exc)
 
-        # read new message in next iteration
-        msg = None
+
+async def handle_request(ctx, request):
+    handler = get_workflow_handler(request)
+    try:
+        workflow.onstart(handler)
+
+        response = None
+        try:
+            response = await handler
+
+        except Error as exc:
+            if __debug__:
+                log.warning(__name__, exc)
+            response = failure(exc.code, exc.message)
+
+        except Exception:
+            if __debug__:
+                log.exception(__name__, exc)
+            response = failure()
+
+    finally:
+        workflow.onclose(handler)
+
+    return response
 
 
 async def keychain_workflow(ctx, req, namespace, handler, *args):
@@ -166,15 +158,24 @@ async def keychain_workflow(ctx, req, namespace, handler, *args):
         keychain.__del__()
 
 
-def import_workflow(ctx, req, pkgname, modname, *args):
+def get_workflow_handler(request):
+    record = workflow_handlers[request.MESSAGE_WIRE_TYPE]
+    if isinstance(record, tuple):
+        pkgname, modname = record
+        record = import_workflow(pkgname, modname)
+    return record(ctx, request)
+
+
+def import_workflow(pkgname, modname):
     modpath = "%s.%s" % (pkgname, modname)
     module = __import__(modpath, None, None, (modname,), 0)
     handler = getattr(module, modname)
-    return handler(ctx, req, *args)
+    return handler
 
 
-async def _handle_unexpected_message(ctx, msg):
+def failure(code=FailureType.FirmwareError, message="Firmware error"):
+    return Failure(code=code, message=message)
 
-    await ctx.write(
-        Failure(code=FailureType.UnexpectedMessage, message="Unexpected message")
-    )
+
+def unexpected_message():
+    return Failure(code=FailureType.UnexpectedMessage, message="Unexpected message")
