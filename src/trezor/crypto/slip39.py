@@ -58,7 +58,7 @@ def complete_word(prefix: str, t9=False) -> int:
     words = find_words(prefix, t9)
     for word in words:
         if len(word) == len(prefix):  # TODO!
-            continue
+            return 0
         mask |= 1 << (ord(word[len(prefix)]) - 97)  # ord('a') == 97
     return mask
 
