@@ -53,6 +53,13 @@ def is_hardened(i: int) -> bool:
     return False
 
 
+def all_hardened(path: list) -> bool:
+    for i in path:
+        if not is_hardened(i):
+            return False
+    return True
+
+
 def break_address_n_to_lines(address_n: list) -> list:
     def path_item(i: int):
         if i & HARDENED:

@@ -1,6 +1,6 @@
 from common import *
 from apps.common import HARDENED
-from apps.common.paths import validate_path_for_get_public_key, is_hardened
+from apps.common.paths import validate_path_for_get_public_key, is_hardened, all_hardened
 
 
 class TestPaths(unittest.TestCase):
@@ -13,6 +13,14 @@ class TestPaths(unittest.TestCase):
         self.assertFalse(is_hardened(44))
         self.assertFalse(is_hardened(0))
         self.assertFalse(is_hardened(99999))
+
+    def test_all_hardened(self):
+        self.assertTrue(all_hardened([44 | HARDENED, 1 | HARDENED, 0 | HARDENED]))
+        self.assertTrue(all_hardened([0 | HARDENED, ]))
+
+        self.assertFalse(all_hardened([44, 44 | HARDENED, 0 | HARDENED]))
+        self.assertFalse(all_hardened([0, ]))
+        self.assertFalse(all_hardened([44 | HARDENED, 1 | HARDENED, 0 | HARDENED, 0 | HARDENED, 0]))
 
     def test_path_for_get_public_key(self):
         # 44'/41'/0'
