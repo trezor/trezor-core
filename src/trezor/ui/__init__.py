@@ -72,9 +72,8 @@ def rotate(pos: tuple) -> tuple:
 
 
 def pulse(delay: int):
-    while True:
-        # normalize sin from interval -1:1 to 0:1
-        yield 0.5 + 0.5 * math.sin(utime.ticks_us() / delay)
+    # normalize sin from interval -1:1 to 0:1
+    return 0.5 + 0.5 * math.sin(utime.ticks_us() / delay)
 
 
 async def alert(count: int = 3):
@@ -136,10 +135,10 @@ def layout(f):
     return inner
 
 
-def layout_no_slide(f):
+def layout_without_fade(fn):
     async def inner(*args, **kwargs):
         try:
-            layout = f(*args, **kwargs)
+            layout = fn(*args, **kwargs)
             workflow.onlayoutstart(layout)
             return await layout
         finally:
@@ -149,7 +148,7 @@ def layout_no_slide(f):
 
 
 def header(
-    title: str, icon: bytes = ICON_DEFAULT, fg: int = FG, bg: int = BG, ifg: int = GREEN
+    title: str, icon: str = ICON_DEFAULT, fg: int = FG, bg: int = BG, ifg: int = GREEN
 ):
     if icon is not None:
         display.icon(14, 15, res.load(icon), ifg, bg)
@@ -241,6 +240,16 @@ class Control:
 
 
 class Layout(Control):
+    async def __iter__(self):
+        try:
+            while True:
+                await loop.spawn(*self.create_tasks())
+        except Result as result:
+            return result.value
+
+    def create_tasks(self):
+        return self.handle_input(), self.handle_rendering()
+
     def handle_input(self):
         touch = loop.wait(io.TOUCH)
         while True:
