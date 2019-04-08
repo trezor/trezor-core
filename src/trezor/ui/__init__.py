@@ -199,3 +199,68 @@ class Widget:
             event, *pos = yield touch
             result = self.touch(event, pos)
         return result
+
+
+# widget-like retained UI, without explicit loop
+
+
+def in_area(area, x, y):
+    ax, ay, aw, ah = area
+    return ax <= x <= ax + aw and ay <= y <= ay + ah
+
+
+# render events
+RENDER = const(-1234)
+REPAINT = const(-1235)
+
+
+class Control:
+    def dispatch(self, event, x, y):
+        if event is RENDER:
+            self.on_render()
+        elif event is io.TOUCH_START:
+            self.on_touch_start(x, y)
+        elif event is io.TOUCH_MOVE:
+            self.on_touch_move(x, y)
+        elif event is io.TOUCH_END:
+            self.on_touch_end(x, y)
+        elif event is REPAINT:
+            self.repaint = True
+
+    def on_render(self):
+        pass
+
+    def on_touch_start(self, x, y):
+        pass
+
+    def on_touch_move(self, x, y):
+        pass
+
+    def on_touch_end(self, x, y):
+        pass
+
+
+class Layout(Control):
+    def handle_input(self):
+        touch = loop.wait(io.TOUCH)
+        while True:
+            event, x, y = yield touch
+            self.dispatch(event, x, y)
+
+    @layout
+    def handle_rendering(self):
+        sleep = loop.sleep(10000)  # 10 msec
+        while True:
+            self.dispatch(RENDER, 0, 0)
+            yield sleep
+
+    async def __iter__(self):
+        try:
+            await loop.spawn(self.handle_input(), self.handle_rendering())
+        except Result as result:
+            return result.value
+
+
+class Result(Exception):
+    def __init__(self, value):
+        self.value = value
