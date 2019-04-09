@@ -50,12 +50,13 @@ TREZOR_MONERO_TESTS_PATH=${TREZOR_MONERO_TESTS_PATH:-./trezor_monero_tests}
 TREZOR_MONERO_TESTS_LOG=${TREZOR_MONERO_TESTS_LOG:-./trezor_monero_tests.log}
 
 if [[ ! -f $TREZOR_MONERO_TESTS_PATH || "`shasum -a256 $TREZOR_MONERO_TESTS_PATH | cut -d' ' -f1`" != $TREZOR_MONERO_TESTS_SHA256SUM ]]; then 
-  echo "Downloading Trezor monero tests binary `pwd` $TREZOR_MONERO_TESTS_PATH"
-  curl -s -L -o $TREZOR_MONERO_TESTS_PATH $TREZOR_MONERO_TESTS_URL \
+  echo "Downloading Trezor monero tests binary to `pwd`${TREZOR_MONERO_TESTS_PATH:1}"
+  curl -# -L -o $TREZOR_MONERO_TESTS_PATH $TREZOR_MONERO_TESTS_URL \
     && chmod +x $TREZOR_MONERO_TESTS_PATH \
     && test "`shasum -a256 $TREZOR_MONERO_TESTS_PATH | cut -d' ' -f1`" == "$TREZOR_MONERO_TESTS_SHA256SUM" || exit 1
 fi
 
+echo "Running tests"
 TIME_TESTS_START=$SECONDS
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   $TREZOR_MONERO_TESTS_PATH 2>&1 > "$TREZOR_MONERO_TESTS_LOG"
