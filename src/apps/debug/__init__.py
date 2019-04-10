@@ -4,12 +4,9 @@ if not __debug__:
     halt("debug mode inactive")
 
 if __debug__:
-    from trezor import loop, utils
-    from trezor.messages import MessageType
-    from trezor.messages.DebugLinkState import DebugLinkState
-    from trezor.ui import confirm, swipe
-    from trezor.wire import register, protobuf_workflow
-    from apps.common import storage, mnemonic
+    # TODO: break dependency of trezor.wire on apps.common.seed
+
+    from trezor import loop
 
     reset_internal_entropy = None
     reset_current_words = None
@@ -18,6 +15,13 @@ if __debug__:
     confirm_signal = loop.signal()
     swipe_signal = loop.signal()
     input_signal = loop.signal()
+
+    from trezor import utils
+    from trezor.messages import MessageType
+    from trezor.messages.DebugLinkState import DebugLinkState
+    from trezor.ui import confirm, swipe
+    from trezor.wire import register, protobuf_workflow
+    from apps.common import storage, mnemonic
 
     async def dispatch_DebugLinkDecision(ctx, msg):
         if msg.yes_no is not None:

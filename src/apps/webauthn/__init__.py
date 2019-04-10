@@ -389,23 +389,23 @@ class ConfirmState:
         await loop.spawn(self.confirm_layout_inner(), workflow.webauthn_stop_signal)
 
     async def confirm_layout_inner(self) -> None:
-        from trezor.ui.confirm import ConfirmDialog, CONFIRMED
+        from trezor.ui.confirm import Confirm, CONFIRMED
         from trezor.ui.text import Text
 
         app_id = bytes(self.app_id)  # could be bytearray, which doesn't have __hash__
 
         if app_id == _BOGUS_APPID and self.action == _CONFIRM_REGISTER:
-            text = Text("U2F", ui.ICON_WRONG, icon_color=ui.RED)
+            text = Text("U2F", ui.ICON_WRONG, ui.RED)
             text.normal(
                 "Another U2F device", "was used to register", "in this application."
             )
             text.render()
-            dialog = ConfirmDialog(text)
+            dialog = Confirm(text)
         else:
             content = ConfirmContent(self.action, app_id)
-            dialog = ConfirmDialog(content)
+            dialog = Confirm(content)
 
-        self.confirmed = await dialog == CONFIRMED
+        self.confirmed = await dialog is CONFIRMED
 
 
 class ConfirmContent(ui.Widget):

@@ -42,6 +42,7 @@ class Paginated(ui.Layout):
     def __init__(self, pages, page=0, one_by_one=False):
         self.pages = pages
         self.page = page
+        self.one_by_one = one_by_one
 
     def dispatch(self, event, x, y):
         pages = self.pages

@@ -2,6 +2,7 @@ from ubinascii import hexlify
 
 from trezor import ui, wire
 from trezor.messages import ButtonRequestType
+from trezor.ui.popup import Popup
 from trezor.ui.text import Text
 from trezor.utils import chunks
 
@@ -12,25 +13,25 @@ DUMMY_PAYMENT_ID = b"\x00" * 8
 
 
 async def require_confirm_watchkey(ctx):
-    content = Text("Confirm export", ui.ICON_SEND, icon_color=ui.GREEN)
+    content = Text("Confirm export", ui.ICON_SEND, ui.GREEN)
     content.normal("Do you really want to", "export watch-only", "credentials?")
     return await require_confirm(ctx, content, ButtonRequestType.SignTx)
 
 
 async def require_confirm_keyimage_sync(ctx):
-    content = Text("Confirm ki sync", ui.ICON_SEND, icon_color=ui.GREEN)
+    content = Text("Confirm ki sync", ui.ICON_SEND, ui.GREEN)
     content.normal("Do you really want to", "sync key images?")
     return await require_confirm(ctx, content, ButtonRequestType.SignTx)
 
 
 async def require_confirm_live_refresh(ctx):
-    content = Text("Confirm refresh", ui.ICON_SEND, icon_color=ui.GREEN)
+    content = Text("Confirm refresh", ui.ICON_SEND, ui.GREEN)
     content.normal("Do you really want to", "start refresh?")
     return await require_confirm(ctx, content, ButtonRequestType.SignTx)
 
 
 async def require_confirm_tx_key(ctx, export_key=False):
-    content = Text("Confirm export", ui.ICON_SEND, icon_color=ui.GREEN)
+    content = Text("Confirm export", ui.ICON_SEND, ui.GREEN)
     txt = ["Do you really want to"]
     if export_key:
         txt.append("export tx_key?")
@@ -71,9 +72,9 @@ async def require_confirm_transaction(ctx, tsx_data, network_type):
 
     await _require_confirm_fee(ctx, tsx_data.fee)
 
-    text = Text("Signing transaction", ui.ICON_SEND, icon_color=ui.BLUE)
+    text = Text("Signing transaction", ui.ICON_SEND, ui.BLUE)
     text.normal("Signing...")
-    text.render()
+    await Popup(text)
 
 
 async def _require_confirm_output(ctx, dst, network_type, payment_id):
@@ -114,14 +115,12 @@ async def _require_confirm_payment_id(ctx, payment_id):
 
 
 async def _require_confirm_fee(ctx, fee):
-    content = Text("Confirm fee", ui.ICON_SEND, icon_color=ui.GREEN)
+    content = Text("Confirm fee", ui.ICON_SEND, ui.GREEN)
     content.bold(common.format_amount(fee))
     await require_hold_to_confirm(ctx, content, ButtonRequestType.ConfirmOutput)
 
 
-@ui.layout
 async def transaction_step(ctx, step, sub_step=None, sub_step_total=None):
-    info = []
     if step == 100:
         info = ["Processing inputs", "%d/%d" % (sub_step + 1, sub_step_total)]
     elif step == 200:
@@ -141,24 +140,22 @@ async def transaction_step(ctx, step, sub_step=None, sub_step_total=None):
     else:
         info = ["Processing..."]
 
-    text = Text("Signing transaction", ui.ICON_SEND, icon_color=ui.BLUE)
+    text = Text("Signing transaction", ui.ICON_SEND, ui.BLUE)
     text.normal(*info)
-    text.render()
+    await Popup(text)
 
 
-@ui.layout
 async def keyimage_sync_step(ctx, current, total_num):
     if current is None:
         return
-    text = Text("Syncing", ui.ICON_SEND, icon_color=ui.BLUE)
+    text = Text("Syncing", ui.ICON_SEND, ui.BLUE)
     text.normal("%d/%d" % (current + 1, total_num))
-    text.render()
+    await Popup(text)
 
 
-@ui.layout
 async def live_refresh_step(ctx, current):
     if current is None:
         return
-    text = Text("Refreshing", ui.ICON_SEND, icon_color=ui.BLUE)
+    text = Text("Refreshing", ui.ICON_SEND, ui.BLUE)
     text.normal("%d" % current)
-    text.render()
+    await Popup(text)

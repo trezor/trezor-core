@@ -77,7 +77,7 @@ def _path_hardened(path: list) -> bool:
     return True
 
 
-@ui.layout_no_slide
+@ui.layout_without_fade
 async def _compute_seed(ctx: wire.Context) -> bytes:
     passphrase = cache.get_passphrase()
     if passphrase is None:
