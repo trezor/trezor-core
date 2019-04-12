@@ -125,7 +125,7 @@ def layout(f):
         slide = backlight_slide(BACKLIGHT_NORMAL)
         try:
             layout = f(*args, **kwargs)
-            workflow.onlayoutstart(layout)
+            # workflow.onlayoutstart(layout)
             loop.schedule(slide)
             display.clear()
             return await layout
