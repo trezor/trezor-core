@@ -31,6 +31,10 @@ SIZE = Display.FONT_SIZE
 WIDTH = Display.WIDTH
 HEIGHT = Display.HEIGHT
 
+# viewport margins
+VIEWX = const(6)
+VIEWY = const(9)
+
 
 def lerpi(a: int, b: int, t: float) -> int:
     return int(a + t * (b - a))
@@ -52,42 +56,9 @@ def blend(ca: int, cb: int, t: float) -> int:
 from trezor.ui.style import *  # isort:skip
 
 
-def contains(area: tuple, pos: tuple) -> bool:
-    x, y = pos
-    ax, ay, aw, ah = area
-    return ax <= x <= ax + aw and ay <= y <= ay + ah
-
-
-def rotate(pos: tuple) -> tuple:
-    r = display.orientation()
-    if r == 0:
-        return pos
-    x, y = pos
-    if r == 90:
-        return (y, WIDTH - x)
-    if r == 180:
-        return (WIDTH - x, HEIGHT - y)
-    if r == 270:
-        return (HEIGHT - y, x)
-
-
 def pulse(delay: int):
     # normalize sin from interval -1:1 to 0:1
     return 0.5 + 0.5 * math.sin(utime.ticks_us() / delay)
-
-
-async def alert(count: int = 3):
-    short_sleep = loop.sleep(20000)
-    long_sleep = loop.sleep(80000)
-    current = display.backlight()
-    for i in range(count * 2):
-        if i % 2 == 0:
-            display.backlight(BACKLIGHT_MAX)
-            yield short_sleep
-        else:
-            display.backlight(BACKLIGHT_NORMAL)
-            yield long_sleep
-    display.backlight(current)
 
 
 async def click() -> tuple:
@@ -155,10 +126,6 @@ def header(
     display.text(44, 35, title, BOLD, fg, bg)
 
 
-VIEWX = const(6)
-VIEWY = const(9)
-
-
 def grid(
     i: int,
     n_x: int = 3,
@@ -178,39 +145,14 @@ def grid(
     return (x + start_x, y + start_y, (w - spacing) * cells_x, (h - spacing) * cells_y)
 
 
-class Widget:
-    tainted = True
-
-    def taint(self):
-        self.tainted = True
-
-    def render(self):
-        pass
-
-    def touch(self, event, pos):
-        pass
-
-    def __iter__(self):
-        touch = loop.wait(io.TOUCH)
-        result = None
-        while result is None:
-            self.render()
-            event, *pos = yield touch
-            result = self.touch(event, pos)
-        return result
-
-
-# widget-like retained UI, without explicit loop
-
-
-def in_area(area, x, y):
+def in_area(area: tuple, x: int, y: int) -> bool:
     ax, ay, aw, ah = area
     return ax <= x <= ax + aw and ay <= y <= ay + ah
 
 
 # render events
-RENDER = const(-1234)
-REPAINT = const(-1235)
+RENDER = const(-255)
+REPAINT = const(-256)
 
 
 class Control:
@@ -239,6 +181,9 @@ class Control:
         pass
 
 
+_RENDER_DELAY_US = const(10000)  # 10 msec
+
+
 class Layout(Control):
     async def __iter__(self):
         try:
@@ -258,7 +203,7 @@ class Layout(Control):
 
     @layout
     def handle_rendering(self):
-        sleep = loop.sleep(10000)  # 10 msec
+        sleep = loop.sleep(_RENDER_DELAY_US)
         while True:
             self.dispatch(RENDER, 0, 0)
             yield sleep
