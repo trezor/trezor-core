@@ -1,18 +1,22 @@
-from trezor import config, io, loop, res, ui
+from trezor import config, log, res, ui, utils
 
 from apps.common import storage
 
 
 async def homescreen():
-    # render homescreen in dimmed mode and fade back in
-    await ui.backlight_slide(ui.BACKLIGHT_DIM)
-    display_homescreen()
-    await ui.backlight_slide(ui.BACKLIGHT_NORMAL)
+    ui.display.backlight(ui.BACKLIGHT_NORMAL)
+    i = 0
 
-    # loop forever, never return
-    touch = loop.wait(io.TOUCH)
-    while True:
-        await touch
+    try:
+        from trezor.ui.mnemonic import MnemonicKeyboard
+        while True:
+            ui.display.clear()
+            i += 1
+            choice = await MnemonicKeyboard("Type the %s word:" % utils.format_ordinal(i))
+            print(choice)
+
+    except Exception as e:
+        log.exception(__name__, e)
 
 
 def display_homescreen():
