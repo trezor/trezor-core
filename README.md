@@ -1,3 +1,9 @@
+# Deprecated
+
+We've moved to monorepo [trezor-firmware](https://github.com/trezor/trezor-firmware). Please file all issues and Pull Requests there.
+
+----
+
 # TREZOR Core
 
 ![TREZOR Logo](docs/logo.png)
